@@ -61,7 +61,7 @@ class Problem():
         self.user_iters = user_iters
         self.current_iter = self.user_iters
         self.Ns = Ns
-
+        
         #### APPLY THESE TO THE METHOD !!! ####
 
         self.state = Problem.states[1]
