@@ -3,7 +3,7 @@ from django.http import HttpResponse
 
 from .problems import Problem
 from .models import pre_defined_problem_list
-from .forms import InitializationForm
+from .forms import InitializationForm, InteractiveForm
 
 PROBLEM = None
 
@@ -17,6 +17,7 @@ def index(request):
 
 def pollution_problem_initialize(request):
     global PROBLEM
+    # PROBLEM is now initialized twice!
     PROBLEM = Problem()
     code, description = PROBLEM.step()
 
@@ -34,8 +35,9 @@ def pollution_problem_initialize(request):
                 context = {"message": "Problem initialized successfully with "
                            "{0} total iters and {1} points to be generated "
                            "for each iteration.".format(
-                               user_iters, generated_points),}
+                               user_iters, generated_points), }
 
+                PROBLEM.initialize(user_iters, generated_points)
                 return render(request, "nautilus/interactive.html", context)
 
         else:
@@ -47,3 +49,27 @@ def pollution_problem_initialize(request):
     context = {"message": "Problem returned response 0"
                ", something has gone wrong..."}
     return render(request, "nautilus/error.html", context)
+
+
+def pollution_problem_interactive(request):
+    global PROBLEM
+    code, description, results = PROBLEM.step()
+    context = {"message": description, "results": results}
+
+    if code == 2:  # Interactive mode
+        print(results["points"])
+        form = InteractiveForm(results["points"], request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            return render(request, "nautilus/interactive.html", context)
+
+        else:
+            form = InteractiveForm(results["points"])
+
+            context["form"] = form
+            print("hello")
+            print(results["points"])
+            print("hello")
+            return render(request, "nautilus/interactive.html", context)
+
+    return render(request, "nautilus/error.html", {"message": "What?"})
