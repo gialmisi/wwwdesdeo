@@ -3,4 +3,24 @@
 {% else %}
 <p>I don't feel so good, Mr. Stark...</p>
 {% endif %}
-<h1>TODO: Form to start iterating!</h1>
+
+<table>
+    {% for key, values in results.items %}
+    <tr>
+        <td>{{key}}</td>
+        <td>{{values}}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% if form %}
+<form action="" method="post">
+  {% csrf_token %}
+  {{ form }}
+  <input type="submit" value="Submit">
+</form>
+{% endif %}
+
+<form action="/nautilus/0/interactive/">
+  <input type="submit" value="Submit"/>
+</form>
