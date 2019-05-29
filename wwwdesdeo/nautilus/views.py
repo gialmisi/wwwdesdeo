@@ -52,24 +52,31 @@ def pollution_problem_initialize(request):
 
 
 def pollution_problem_interactive(request):
-    global PROBLEM
-    code, description, results = PROBLEM.step()
+    code, description, results = step_problem()
     context = {"message": description, "results": results}
 
     if code == 2:  # Interactive mode
         print(results["points"])
-        form = InteractiveForm(results["points"], request.POST)
+        form = InteractiveForm(request.POST)
+
         if form.is_valid():
-            data = form.cleaned_data
+            selection = form.cleaned_data["preferred_point"]
+            print(selection)
+            if selection < len(results["points"]):
+                zh  = results["points"][selection-1]
+
             return render(request, "nautilus/interactive.html", context)
 
         else:
-            form = InteractiveForm(results["points"])
+            form = InteractiveForm()
 
             context["form"] = form
-            print("hello")
-            print(results["points"])
-            print("hello")
             return render(request, "nautilus/interactive.html", context)
 
     return render(request, "nautilus/error.html", {"message": "What?"})
+
+
+def step_problem(preference=(None, None)):
+    global PROBLEM
+    code, description, results = PROBLEM.step(preference)
+    return code, description, results
