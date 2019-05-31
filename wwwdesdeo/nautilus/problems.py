@@ -1,21 +1,10 @@
 import os
 
 from desdeo.method import ENAUTILUS
-from desdeo.optimization import PointSearch, SciPyDE
-from desdeo.problem import PreGeneratedProblem
 from desdeo.problem.toy import RiverPollution
 
 example_path = os.path.dirname(
     "/home/kilo/workspace/www-desdeo/wwwdesdeo/nautilus/")
-
-def asdfsafsdf():
-    method = ENAUTILUS(RiverPollution(), SciPyDE)
-
-
-    method.user_iters = 5
-    method.current_iter = 5
-    method.Ns = 5
-    print(method.next_iteration(preference=(None, None)))
 
 
 class Problem():
@@ -67,3 +56,6 @@ class Problem():
         self.method.Ns = self.Ns
 
         self.state = Problem.states[1]
+
+
+        

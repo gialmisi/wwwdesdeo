@@ -1,11 +1,6 @@
-{% if available_problems_list %}
-<ul>
-  {% for problem in available_problems_list %}
-  <li><a href="/nautilus/{{ problem.id }}/">{{ problem.description }}</a>
-  </li>
-  {% endfor %}
-</ul>
 
-{% else %}
-<p>No problems available!</p>
-{% endif %}
+<form acion="" method="post">
+  {% csrf_token %}
+  {{ form }}
+  <input type="submit" value="Set">
+</form>
