@@ -16,14 +16,14 @@ class InitializationForm(forms.Form):
             self,
             available_methods,
             available_optimizers,
-            examples,
+            problems,
             *args,
             **kwargs):
 
         super(InitializationForm, self).__init__(*args, **kwargs)
 
         self.__available_optimizers = available_optimizers
-        self.__examples = examples
+        self.__problems = problems
 
         self.fields["interactive_method"] = self.__create_form(
             available_methods,
@@ -31,6 +31,6 @@ class InitializationForm(forms.Form):
         self.fields["optimizer"] = self.__create_form(
             available_optimizers,
             "Optimizer")
-        self.fields["examples"] = self.__create_form(
-            examples,
-            "Pre-defined example")
+        self.fields["problem"] = self.__create_form(
+            problems,
+            "Problem to be solved")

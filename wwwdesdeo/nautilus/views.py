@@ -1,11 +1,8 @@
 from django.shortcuts import render
-from django.http import HttpResponse
 
-from .problems import Problem
+import stateful_view as sf
 import models as m
 from .forms import InitializationForm
-
-PROBLEM = None
 
 
 def index(request):
@@ -13,23 +10,59 @@ def index(request):
     context = {
         "available_methods": m.available_methods,
         "available_optimizers": m.available_optimizers,
-        "examples": m.examples,
+        "problems": m.problems,
     }
 
     if request.method == "POST":
-        form = InitializationForm(request.POST)
+        form = InitializationForm(
+            m.available_methods,
+            m.available_optimizers,
+            m.problems,
+            request.POST)
         if form.is_valid():
-            # do stuff
-            pass
+            data = form.cleaned_data
+            if data["problem"] == "Custom":
+                # ask the DM to specify the problems
+                # TODO
+                context["message"] = "Not implemented"
+                template = "nautilus/error.html"
+            else:
+                method = data["interactive_method"]
+                optimizer = data["optimizer"]
+                problem = data["problem"]
+
+                sf_view = sf.available_method_views_d[method](
+                    method,
+                    optimizer,
+                    problem)
+                sf.sf_view = sf_view
+                return method_initialization(request)
+        else:
+            context["message"] = "Request not of type POST"
+            template = "nautilus/error.html"
 
     else:
         form = InitializationForm(
             m.available_methods,
             m.available_optimizers,
-            m.examples)
+            m.problems)
         context["form"] = form
+        template = "nautilus/index.html"
 
-    return render(request, "nautilus/index.html", context)
+    return render(request, template, context)
+
+
+def method_initialization(request):
+    template_dir = "nautilus/" + sf.sf_view.template_dir
+    requirements = sf.sf_view.get_initialization_requirements()
+    print(requirements)
+    context = {
+        "requirements": requirements,
+        }
+    # TODO create form to hand the requirements
+    return render(request,
+                  template_dir + "/init.html",
+                  context)
 
     #     if code == 1:  # Initialization
     #     context = {"message": description}

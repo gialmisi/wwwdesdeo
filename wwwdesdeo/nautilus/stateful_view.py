@@ -1,21 +1,77 @@
-from desdeo.method import ENAUTILUS
-from desdeo.optimization import SciPyDE
-from desdeo.problem.toy import RiverPollution
+from abc import abstractmethod, abstractproperty
+import models as m
+
+current_view = None
 
 
-class ENautilusView():
-    def __init__(self, problem=RiverPollution(), method=SciPyDE):
-        self.__method = ENAUTILUS(problem, method)
-        self.__user_iters = 5
-        self.__current_iter = self.user_iters
-        self.__n_generated_points = 10
-        self.__nadir = self.method.problem.nadir
-        self.__ideal = self.method.problem.ideal
-        self.__initialized = False
+class NautilusView():
+    def __init__(self,
+                 method="ENAUTILUS",
+                 optimizer="SciPyDE",
+                 problem="River Pollution"
+                 ):
+        _method = m.available_methods_d[method]
+        _optimizer = m.available_optimizers_d[optimizer]
+        _problem = m.problems_d[problem]
+
+        self._method = _method(_problem, _optimizer)
+        self._nadir = self.method.problem.nadir
+        self._ideal = self.method.problem.ideal
+        self._initialized = False
 
     @property
     def method(self):
-        return self.__method
+        return self._method
+
+    @property
+    def nadir(self):
+        return self._nadir
+
+    @property
+    def ideal(self):
+        return self._ideal
+
+    @property
+    def initialized(self):
+        return self._initialized
+
+    @initialized.setter
+    def initialized(self, val):
+        self._initialized = val
+
+    @abstractmethod
+    def get_initialization_requirements(self):
+        pass
+
+    @abstractmethod
+    def initialize(self):
+        pass
+
+    @abstractmethod
+    def iterate(self):
+        pass
+
+    @abstractmethod
+    def template_dir(self):
+        pass
+
+
+class ENautilusView(NautilusView):
+    def __init__(self,
+                 method="ENAUTILUS",
+                 optimizer="SciPyDE",
+                 problem="River Pollution"
+                 ):
+
+        super().__init__(method, optimizer, problem)
+        self.__template_dir = "ENAUTILUS"
+        self.__user_iters = 5
+        self.__current_iter = self.user_iters
+        self.__n_generated_points = 10
+
+    @property
+    def template_dir(self):
+        return self.__template_dir
 
     @property
     def user_iters(self):
@@ -44,21 +100,20 @@ class ENautilusView():
         self.__validate_is_positive(val)
         self.__n_generated_points = val
 
-    @property
-    def nadir(self):
-        return self.__nadir
-
-    @property
-    def ideal(self):
-        return self.__ideal
+    def get_initialization_requirements(self):
+        reqs = [
+            "User iterations",
+            "Number of generated points",
+            ]
+        return reqs
 
     @property
     def initialized(self):
-        return self.__initialized
+        return self._initialized
 
     @initialized.setter
     def initialized(self, val):
-        self.__initialized = val
+        self._initialized = val
 
     def __validate_is_positive(self, val):
         if val < 1:
@@ -87,3 +142,8 @@ class ENautilusView():
         self.current_iter = self.method.current_iter
 
         return results_d
+
+
+available_method_views_d = {
+    "ENAUTILUS": ENautilusView,
+    }
