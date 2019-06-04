@@ -73,6 +73,13 @@ class ENautilusView(NautilusView):
         self.__current_iter = self.user_iters
         self.__n_generated_points = 10
         self.__first_iteration = True
+        self.__initialization_requirements = [
+            "User iterations",
+            "Number of generated points",
+            ]
+        self.__preference_requirements = [
+            "Most preferred point",
+            ]
 
     @property
     def template_dir(self):
@@ -113,18 +120,13 @@ class ENautilusView(NautilusView):
     def first_iteration(self, val):
         self.__first_iteration = val
 
-    def get_initialization_requirements(self):
-        reqs = [
-            "User iterations",
-            "Number of generated points",
-            ]
-        return reqs
+    @property
+    def initialization_requirements(self):
+        return self.__initialization_requirements
 
-    def get_preference_requirements(self):
-        prefs = [
-            "Most preferred point",
-            ]
-        return prefs
+    @property
+    def preference_requirements(self):
+        return self.__preference_requirements
 
     @property
     def initialized(self):
@@ -150,6 +152,8 @@ class ENautilusView(NautilusView):
         self.initialized = True
 
     def iterate(self, preference=(None, None)):
+        """Iterate and return the results in a format that can be shown to the
+        DM."""
         # Update the first iteration flag when an iteration is issued
         # for the first time
         if self.first_iteration:
@@ -158,9 +162,13 @@ class ENautilusView(NautilusView):
         results = self.method.next_iteration(
             preference=preference)
 
+        # The dictionary entry labeled by the preference requirements are posed
+        # to the DM as choices
         results_d = {
-            "lower_bounds": [entry[0] for entry in results],
-            "points": [entry[1] for entry in results],
+            "Most preferred point": [entry[0] for entry in results],
+            "extra_info": {
+                "lower_bounds": [entry[1] for entry in results],
+                }
             }
 
         # Update the underlying method

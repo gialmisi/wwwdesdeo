@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, reverse
 
 import stateful_view as sf
 import models as m
-from .forms import InitializationForm, MethodInitializationForm
+from .forms import InitializationForm, MethodInitializationForm, IterationForm
 
 
 def index(request):
@@ -58,7 +58,7 @@ def method_initialization(request):
     template_dir = "nautilus/" + sf.current_view.template_dir
     template = template_dir + "/init.html"
     # Every method has its' own requirements for initialization
-    requirements = sf.current_view.get_initialization_requirements()
+    requirements = sf.current_view.initialization_requirements
 
     context = {
         "requirements": requirements,
@@ -88,18 +88,38 @@ def method_iteration(request):
     # Every method should have their own template
     template_dir = "nautilus/" + sf.current_view.template_dir
     template = template_dir + "/iterate.html"
-    # Every method has its' own preference requirements for iteration
-    preferences = sf.current_view.get_preference_requirements()
-
-    context = {
-        "preferences": preferences,
-        }
+    # Every method has its' own preference requirements for iterating
+    preferences = sf.current_view.preference_requirements
+    context = {}
 
     # Iterate for the first time
     if sf.current_view.first_iteration:
         # iterate with no preferences
         results = sf.current_view.iterate()
         context["results"] = results
+
+    context["forms"] = {}
+    if request.method == "POST":
+        for pref in preferences:
+            form = IterationForm(
+                results[pref],
+                request.POST)
+            context["forms"][pref] = form
+
+        for form in context["forms"]:
+            if form.is_valid():
+                # handle valid values
+                pass
+            else:
+                # raise error
+                pass
+    else:
+        for pref in preferences:
+            form = IterationForm(
+                results[pref])
+            context["forms"][pref] = form
+            print(context["forms"])
+
         return render(request, template, context)
 
     return redirect(reverse("index"))

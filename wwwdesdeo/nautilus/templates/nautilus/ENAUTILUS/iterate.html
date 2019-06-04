@@ -1,1 +1,32 @@
-{{ results }}
+<h1>Iterating</h1>
+
+<!-- Display the results -->
+{% if results %}
+<h2>Results</h2>
+<table style="width:100%">
+  <tr>
+    <th>Label</th>
+    <th>Point</th>
+  </tr>
+  {% for key, value in results.items %}
+  <tr>
+    <td>{{ forloop.counter0 }}</td>
+    <td>{{ point }}</td>
+    <td>
+  </tr>
+  {% endfor %}
+</table>
+{% endif %}
+
+<!-- Ask for preference -->
+{% if forms %}
+<h2>Decisions</h2>
+{% for key, value in forms.items %}
+<h3>{{ key }}</h3>
+<form action="" method="post">
+  {% csrf_token %}
+  {{ value }}
+  <input type="submit" value="Submit">
+</form>
+{% endfor %}
+{% endif %}
