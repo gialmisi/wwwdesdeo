@@ -44,7 +44,11 @@ class NautilusView():
         pass
 
     @abstractmethod
-    def initialize(self):
+    def get_preference_requirements(self):
+        pass
+
+    @abstractmethod
+    def initialize(self, **kwargs):
         pass
 
     @abstractmethod
@@ -64,10 +68,11 @@ class ENautilusView(NautilusView):
                  ):
 
         super().__init__(method, optimizer, problem)
-        self.__template_dir = "ENAUTILUS"
+        self.__template_dir = method + '/'
         self.__user_iters = 5
         self.__current_iter = self.user_iters
         self.__n_generated_points = 10
+        self.__first_iteration = True
 
     @property
     def template_dir(self):
@@ -100,12 +105,26 @@ class ENautilusView(NautilusView):
         self.__validate_is_positive(val)
         self.__n_generated_points = val
 
+    @property
+    def first_iteration(self):
+        return self.__first_iteration
+
+    @first_iteration.setter
+    def first_iteration(self, val):
+        self.__first_iteration = val
+
     def get_initialization_requirements(self):
         reqs = [
             "User iterations",
             "Number of generated points",
             ]
         return reqs
+
+    def get_preference_requirements(self):
+        prefs = [
+            "Most preferred point",
+            ]
+        return prefs
 
     @property
     def initialized(self):
@@ -119,10 +138,10 @@ class ENautilusView(NautilusView):
         if val < 1:
             raise ValueError("Value must be positive!")
 
-    def initialize(self, user_iters, n_generated_points):
-        self.user_iters = user_iters
+    def initialize(self, **kwargs):
+        self.user_iters = kwargs["User iterations"]
         self.current_iter = self.user_iters
-        self.n_generated_points = n_generated_points
+        self.n_generated_points = int(kwargs["Number of generated points"])
 
         self.method.user_iters = self.user_iters
         self.method.current_iter = self.user_iters
@@ -131,6 +150,11 @@ class ENautilusView(NautilusView):
         self.initialized = True
 
     def iterate(self, preference=(None, None)):
+        # Update the first iteration flag when an iteration is issued
+        # for the first time
+        if self.first_iteration:
+            self.first_iteration = False
+
         results = self.method.next_iteration(
             preference=preference)
 
@@ -139,6 +163,7 @@ class ENautilusView(NautilusView):
             "points": [entry[1] for entry in results],
             }
 
+        # Update the underlying method
         self.current_iter = self.method.current_iter
 
         return results_d

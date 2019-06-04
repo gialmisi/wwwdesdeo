@@ -41,9 +41,11 @@ class ENautilusView_test(TestCase):
         self.assertFalse(c.initialized)
         self.assertEqual(c.user_iters, 5)
         self.assertEqual(c.n_generated_points, 10)
+        self.assertTrue(c.first_iteration)
 
         # Check values after initialization
-        c.initialize(15, 20)
+        vals = {"User iterations": 15, "Number of generated points": 20}
+        c.initialize(**vals)
         self.assertTrue(c.initialized)
         self.assertEqual(c.user_iters, 15)
         self.assertEqual(c.n_generated_points, 20)
@@ -52,14 +54,22 @@ class ENautilusView_test(TestCase):
         self.assertEqual(c.method.user_iters, 15)
         self.assertEqual(c.method.Ns, 20)
 
+        # Check that missing keys are noted
+        missing_vals = {"False key": "adsfdfa"}
+        with self.assertRaises(KeyError):
+            c.initialize(**missing_vals)
+
     def test_iterate(self):
         c = ENautilusView()
 
         # Check decrement of current iter after iteration
-        c.initialize(10, 10)
+        vals = {"User iterations": 10, "Number of generated points": 10}
+        c.initialize(**vals)
         self.assertEqual(c.current_iter, 10)
+        self.assertTrue(c.first_iteration)
         c.iterate()
         self.assertEqual(c.current_iter, 9)
+        self.assertFalse(c.first_iteration)
 
 
 # class Forms_test(TestCase):

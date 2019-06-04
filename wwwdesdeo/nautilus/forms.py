@@ -19,7 +19,6 @@ class InitializationForm(forms.Form):
             problems,
             *args,
             **kwargs):
-
         super(InitializationForm, self).__init__(*args, **kwargs)
 
         self.__available_optimizers = available_optimizers
@@ -34,3 +33,14 @@ class InitializationForm(forms.Form):
         self.fields["problem"] = self.__create_form(
             problems,
             "Problem to be solved")
+
+
+class MethodInitializationForm(forms.Form):
+    def __init__(self,
+                 requirements,
+                 *args,
+                 **kwargs):
+        super(MethodInitializationForm, self).__init__(*args, *kwargs)
+
+        for requirement in requirements:
+            self.fields[requirement] = forms.FloatField(label=requirement)
