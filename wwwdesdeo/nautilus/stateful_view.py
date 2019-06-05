@@ -1,66 +1,115 @@
-from abc import abstractmethod, abstractproperty
 import models as m
 
 current_view = None
 
 
 class NautilusView():
+    """A base class for creating views for the NAUTILUS-family methods
+    defined in DESDEO.
+
+    """
     def __init__(self,
                  method="ENAUTILUS",
                  optimizer="SciPyDE",
                  problem="River Pollution"
                  ):
+        """Initializer
+
+        :param method: Name of the method to be used. Must be defined in
+        available_methods_d
+        :param optimizer: Optimizer routine. Must be defined in
+        available_optimizers_d
+        :param problem: Pre-set or custom problem. Pre-sets must be defined in
+        problems_d.
+
+        """
         _method = m.available_methods_d[method]
         _optimizer = m.available_optimizers_d[optimizer]
         _problem = m.problems_d[problem]
 
-        self._method = _method(_problem, _optimizer)
-        self._nadir = self.method.problem.nadir
-        self._ideal = self.method.problem.ideal
-        self._initialized = False
+        self.__method = _method(_problem, _optimizer)
+        self.__nadir = self.method.problem.nadir
+        self.__ideal = self.method.problem.ideal
+        self.__initialized = False
+        self.__template_dir = method + '/'
+        self.__is_first_iteration = True
+        self.__initialization_requirements = None
+        self.__preference_requirements = None
+        self.__last_iteration = None
 
     @property
     def method(self):
-        return self._method
+        return self.__method
 
     @property
     def nadir(self):
-        return self._nadir
+        return self.__nadir
+
+    @nadir.setter
+    def nadir(self, val):
+        self.__nadir = val
 
     @property
     def ideal(self):
-        return self._ideal
+        return self.__ideal
+
+    @ideal.setter
+    def ideal(self, val):
+        self.__ideal = val
 
     @property
     def initialized(self):
-        return self._initialized
+        return self.__initialized
 
     @initialized.setter
     def initialized(self, val):
-        self._initialized = val
+        self.__initialized = val
 
-    @abstractmethod
-    def get_initialization_requirements(self):
-        pass
-
-    @abstractmethod
-    def get_preference_requirements(self):
-        pass
-
-    @abstractmethod
-    def initialize(self, **kwargs):
-        pass
-
-    @abstractmethod
-    def iterate(self):
-        pass
-
-    @abstractmethod
+    @property
     def template_dir(self):
-        pass
+        return self.__template_dir
+
+    @template_dir.setter
+    def template_dir(self, val):
+        self.__template_dir = val
+
+    @property
+    def is_first_iteration(self):
+        return self.__is_first_iteration
+
+    @is_first_iteration.setter
+    def is_first_iteration(self, val):
+        self.__is_first_iteration = val
+
+    @property
+    def initialization_requirements(self):
+        return self.__initialization_requirements
+
+    @initialization_requirements.setter
+    def initialization_requirements(self, val):
+        self.__initialization_requirements = val
+
+    @property
+    def preference_requirements(self):
+        return self.__preference_requirements
+
+    @preference_requirements.setter
+    def preference_requirements(self, val):
+        self.__preference_requirements = val
+
+    @property
+    def last_iteration(self):
+        return self.__last_iteration
+
+    @last_iteration.setter
+    def last_iteration(self, val):
+        self.__last_iteration = val
 
 
 class ENautilusView(NautilusView):
+    """Specialization of the NautilusView class for the Enhanced NAUTILUS method.
+
+    """
     def __init__(self,
                  method="ENAUTILUS",
                  optimizer="SciPyDE",
@@ -68,22 +117,19 @@ class ENautilusView(NautilusView):
                  ):
 
         super().__init__(method, optimizer, problem)
-        self.__template_dir = method + '/'
         self.__user_iters = 5
         self.__current_iter = self.user_iters
         self.__n_generated_points = 10
-        self.__first_iteration = True
-        self.__initialization_requirements = [
+        self.is_first_iteration = True
+        self.initialization_requirements = [
             "User iterations",
             "Number of generated points",
             ]
-        self.__preference_requirements = [
+        self.preference_requirements = [
             "Most preferred point",
             ]
-
-    @property
-    def template_dir(self):
-        return self.__template_dir
+        self.last_iteration = None
+        self.__total_points_returned = 0
 
     @property
     def user_iters(self):
@@ -112,38 +158,15 @@ class ENautilusView(NautilusView):
         self.__validate_is_positive(val)
         self.__n_generated_points = val
 
-    @property
-    def first_iteration(self):
-        return self.__first_iteration
-
-    @first_iteration.setter
-    def first_iteration(self, val):
-        self.__first_iteration = val
-
-    @property
-    def initialization_requirements(self):
-        return self.__initialization_requirements
-
-    @property
-    def preference_requirements(self):
-        return self.__preference_requirements
-
-    @property
-    def initialized(self):
-        return self._initialized
-
-    @initialized.setter
-    def initialized(self, val):
-        self._initialized = val
-
     def __validate_is_positive(self, val):
         if val < 1:
             raise ValueError("Value must be positive!")
 
     def initialize(self, **kwargs):
-        self.user_iters = kwargs["User iterations"]
-        self.current_iter = self.user_iters
-        self.n_generated_points = int(kwargs["Number of generated points"])
+        if kwargs:
+            self.user_iters = kwargs["User iterations"]
+            self.current_iter = self.user_iters
+            self.n_generated_points = int(kwargs["Number of generated points"])
 
         self.method.user_iters = self.user_iters
         self.method.current_iter = self.user_iters
@@ -156,20 +179,21 @@ class ENautilusView(NautilusView):
         DM."""
         # Update the first iteration flag when an iteration is issued
         # for the first time
-        if self.first_iteration:
-            self.first_iteration = False
+        if self.is_first_iteration:
+            self.is_first_iteration = False
 
         results = self.method.next_iteration(
             preference=preference)
 
         # The dictionary entry labeled by the preference requirements are posed
-        # to the DM as choices
+        # to the DM as choices. Alwats return the latest points.
+        start = self.__total_points_returned
         results_d = {
-            "Most preferred point": [entry[0] for entry in results],
-            "extra_info": {
-                "lower_bounds": [entry[1] for entry in results],
-                }
+            "Most preferred point": [entry[1] for entry in results[start:]],
+            "lower_bounds": [entry[0] for entry in results[start:]],
             }
+        self.last_iteration = results_d
+        self.__total_points_returned = len(results)
 
         # Update the underlying method
         self.current_iter = self.method.current_iter

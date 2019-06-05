@@ -6,7 +6,15 @@ from .forms import InitializationForm, MethodInitializationForm, IterationForm
 
 
 def index(request):
-    """Shows available methods and problems"""
+    """Handles the initial page where the user can define a problem to
+    be solved and other relevant parameters related to the NAUTILIS-family
+    of interactive methods.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
     context = {
         "available_methods": m.available_methods,
         "available_optimizers": m.available_optimizers,
@@ -43,6 +51,7 @@ def index(request):
             template = "nautilus/error.html"
 
     else:
+        # If request is GET, initialize the form
         form = InitializationForm(
             m.available_methods,
             m.available_optimizers,
@@ -54,6 +63,14 @@ def index(request):
 
 
 def method_initialization(request):
+    """Handles the page where the user can specify method-specific
+    parameters in the initialization phase of the method.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
     # Every method should have their own template
     template_dir = "nautilus/" + sf.current_view.template_dir
     template = template_dir + "/init.html"
@@ -85,7 +102,15 @@ def method_initialization(request):
 
 
 def method_iteration(request):
-    # Every method should have their own template
+    """Generates pages with relevant information and interactive features
+    to hande the iterative phase of a NAUTILUS method.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
+    # Every method should have their own templates
     template_dir = "nautilus/" + sf.current_view.template_dir
     template = template_dir + "/iterate.html"
     # Every method has its' own preference requirements for iterating
@@ -93,32 +118,37 @@ def method_iteration(request):
     context = {}
 
     # Iterate for the first time
-    if sf.current_view.first_iteration:
+    if sf.current_view.is_first_iteration:
         # iterate with no preferences
-        results = sf.current_view.iterate()
-        context["results"] = results
+        sf.current_view.iterate()
 
     context["forms"] = {}
+    last_results = sf.current_view.last_iteration
+    context["results"] = last_results
+
     if request.method == "POST":
         for pref in preferences:
             form = IterationForm(
-                results[pref],
+                range(len(last_results[pref])),
                 request.POST)
             context["forms"][pref] = form
 
-        for form in context["forms"]:
+        for form in context["forms"].values():
             if form.is_valid():
-                # handle valid values
-                pass
+                data = form.cleaned_data
+                index = int(data["choice"])
+                # convert to a tuple containing lists of floats
+                preference = list(zip(*last_results.values()))[index]
+                sf.current_view.iterate(preference)
+                return redirect(reverse("method_iteration"))
             else:
-                # raise error
-                pass
+                context["message"] = "Form is invalid"
+                return redirect(reverse("index"))
     else:
         for pref in preferences:
             form = IterationForm(
-                results[pref])
+                range(len(last_results[pref])))
             context["forms"][pref] = form
-            print(context["forms"])
 
         return render(request, template, context)
 

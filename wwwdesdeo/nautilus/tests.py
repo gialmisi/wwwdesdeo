@@ -1,5 +1,54 @@
+from functools import reduce
+
 from django.test import TestCase
-from .stateful_view import ENautilusView
+from .stateful_view import ENautilusView, NautilusView
+
+
+class NautilusView_test(TestCase):
+    def test_initializer(self):
+        # default values
+        c = NautilusView()
+        self.assertFalse(c.initialized)
+        self.assertEqual(c.template_dir, "ENAUTILUS/")
+        self.assertTrue(c.is_first_iteration)
+        self.assertIsNone(c.initialization_requirements)
+        self.assertIsNone(c.preference_requirements)
+        self.assertIsNone(c.last_iteration)
+
+    def test_properties(self):
+        c = NautilusView()
+
+        # nadir
+        c.nadir = [2.0, 5.0]
+        self.assertAlmostEqual(c.nadir, [2.0, 5.0])
+
+        # ideal
+        c.ideal = [5.5, -2.1]
+        self.assertAlmostEqual(c.ideal, [5.5, -2.1])
+
+        # initialized
+        c.initialized = True
+        self.assertTrue(c.initialized)
+
+        # template_dir
+        c.template_dir = "/test/path/alpha"
+        self.assertEqual(c.template_dir, "/test/path/alpha")
+
+        # is_first_iteration
+        c.is_first_iteration = False
+        self.assertFalse(c.is_first_iteration)
+
+        # initialization_requirements
+        c.initialization_requirements = ["nadir", "iters"]
+        self.assertEqual(c.initialization_requirements, ["nadir", "iters"])
+
+        # preference_requirements
+        c.preference_requirements = ["best", "worst"]
+        self.assertEqual(c.preference_requirements, ["best", "worst"])
+
+        # last_iteration
+        c.last_iteration = [5.0, 2.0, -3.33]
+        self.assertAlmostEqual(c.last_iteration, [5.0, 2.0, -3.33])
 
 
 class ENautilusView_test(TestCase):
@@ -41,7 +90,7 @@ class ENautilusView_test(TestCase):
         self.assertFalse(c.initialized)
         self.assertEqual(c.user_iters, 5)
         self.assertEqual(c.n_generated_points, 10)
-        self.assertTrue(c.first_iteration)
+        self.assertTrue(c.is_first_iteration)
 
         # Check values after initialization
         vals = {"User iterations": 15, "Number of generated points": 20}
@@ -66,20 +115,28 @@ class ENautilusView_test(TestCase):
         vals = {"User iterations": 10, "Number of generated points": 10}
         c.initialize(**vals)
         self.assertEqual(c.current_iter, 10)
-        self.assertTrue(c.first_iteration)
+        self.assertTrue(c.is_first_iteration)
         c.iterate()
         self.assertEqual(c.current_iter, 9)
-        self.assertFalse(c.first_iteration)
+        self.assertFalse(c.is_first_iteration)
+
+    def test_last_iteration(self):
+        c = ENautilusView()
+        c.initialize()
+        curr = c.iterate()
+        last = c.last_iteration
+        self.assertTrue(compare_dicts(curr, last))
+        curr = c.iterate((last["Most preferred point"][0],
+                          last["lower_bounds"][0]))
+        self.assertFalse(compare_dicts(curr, last))
 
 
-# class Forms_test(TestCase):
-#     def test_initialization_form(self):
-#         f = forms.InitializationForm(models.available_methods,
-#                                      models.available_optimizers,
-#                                      models.examples)
-#         self.assertEqual(f.fields["interactive_method"],
-#                          models.available_methods)
-#         self.assertEqual(f.fields["available_optimizers"],
-#                          models.available_optimizers)
-#         self.assertEqual(f.fields["examples"],
-#                          models.examples)
+def compare_dicts(this, that):
+    eps = 0.001
+    ress = []
+    for key in this.keys():
+        for vals1, vals2 in zip(this[key], that[key]):
+            res = [eps > abs(v1 - v2) for (v1, v2) in zip(vals1, vals2)]
+            ress.append(reduce(lambda x, y: x and y, res))
+    # True is all entries are True, otherwise, False
+    return reduce(lambda x, y: x and y, ress)

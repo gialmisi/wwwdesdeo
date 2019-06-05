@@ -58,4 +58,4 @@ class IterationForm(forms.Form):
             widget=forms.RadioSelect,
             choices=labeled_choices,
             label="")
-        self.fields["choices"] = choice_field
+        self.fields["choice"] = choice_field
