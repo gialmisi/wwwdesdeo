@@ -1,9 +1,11 @@
 from functools import reduce
 
-from django.test import TestCase
+from django.test import TestCase, tag
 from .stateful_view import ENautilusView, NautilusView
+from .expression_parser import exprs_to_lambda, free_symbols_dict
 
 
+@tag("stateful_view")
 class NautilusView_test(TestCase):
     def test_initializer(self):
         # default values
@@ -131,6 +133,7 @@ class ENautilusView_test(TestCase):
         self.assertFalse(compare_dicts(curr, last))
 
 
+@tag("stateful_view")
 def compare_dicts(this, that):
     eps = 0.001
     ress = []
@@ -140,3 +143,35 @@ def compare_dicts(this, that):
             ress.append(reduce(lambda x, y: x and y, res))
     # True is all entries are True, otherwise, False
     return reduce(lambda x, y: x and y, ress)
+
+
+@tag("parser")
+class expression_parser_test(TestCase):
+    def test_exprs_to_lambda(self):
+        """Test that a simple string is properly parsed into a callable expression.
+        """
+        str_input = "x + y"
+        lam = exprs_to_lambda(str_input)
+        self.assertAlmostEqual(lam(5, 6), 11)
+
+    def test_free_symbols_dict(self):
+        """Test that the right free symbols are extracted from a simple string input.
+        """
+        str_input = "x - y / z"
+        sdict = free_symbols_dict(str_input)
+        lam = exprs_to_lambda(str_input)
+        sdict["x"] = 5
+        sdict["y"] = 7
+        sdict["z"] = 13
+        self.assertAlmostEqual(lam(**sdict), 4.46153846154)
+
+    def test_exprs_to_lambda_complex(self):
+        """A more complex test"""
+        str_input = "cos(x*pi) + x**2 - y / sqrt(z) + a*y"
+        sdict = free_symbols_dict(str_input)
+        lam = (exprs_to_lambda(str_input))
+        sdict["x"] = -5.1
+        sdict["y"] = 1.2
+        sdict["z"] = 9.3
+        sdict["a"] = -0.004
+        self.assertAlmostEqual(lam(**sdict), 24.66064798223447)

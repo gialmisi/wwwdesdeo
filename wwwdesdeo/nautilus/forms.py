@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import formset_factory
 
 
 class InitializationForm(forms.Form):
@@ -59,3 +60,20 @@ class IterationForm(forms.Form):
             choices=labeled_choices,
             label="")
         self.fields["choice"] = choice_field
+
+
+class AnalyticalProblemInputForm(forms.Form):
+    """Documentation for AnalyticalProblemInputForm
+
+    """
+    expression = forms.CharField(
+        label="Expression",
+        max_length=100,
+        widget=forms.TextInput(attrs={
+            "class": 'form-control',
+            "placeholder": "expression"}),
+        required=False)
+
+
+AnalyticalProblemInputFormSet = formset_factory(AnalyticalProblemInputForm,
+                                                extra=1)

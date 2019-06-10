@@ -10,6 +10,8 @@ urlpatterns = [
          name="method_iteration"),
     path("results.html", views.method_results,
          name="method_results"),
+    path("analytical_problem_input.html", views.analytical_problem_input,
+         name="analytical_problem_input"),
     # path("0/", views.pollution_problem_initialize,
     #      name="pollution_problem_initialize"),
     # path("0/interactive/", views.pollution_problem_interactive,

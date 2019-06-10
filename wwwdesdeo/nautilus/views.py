@@ -2,7 +2,10 @@ from django.shortcuts import render, redirect, reverse
 
 import stateful_view as sf
 import models as m
-from .forms import InitializationForm, MethodInitializationForm, IterationForm
+from .forms import (InitializationForm,
+                    MethodInitializationForm,
+                    IterationForm,
+                    AnalyticalProblemInputFormSet)
 
 
 def index(request):
@@ -31,9 +34,7 @@ def index(request):
             data = form.cleaned_data
             if data["problem"] == "Custom":
                 # ask the DM to specify a custom problem
-                # TODO
-                context["message"] = "Not implemented"
-                template = "nautilus/error.html"
+                return redirect(reverse("analytical_problem_input"))
             else:
                 method = data["interactive_method"]
                 optimizer = data["optimizer"]
@@ -173,5 +174,20 @@ def method_results(request):
     final_results = sf.current_view.last_iteration
     context = {}
     context["results"] = final_results
+
+    return render(request, template, context)
+
+
+def analytical_problem_input(request):
+    template = "nautilus/analytical_problem_input.html"
+    context = {}
+
+    if request.method == "POST":
+        # handle filled form
+        pass
+    else:
+        formset = AnalyticalProblemInputFormSet()
+        context["formset"] = formset
+        context["heading"] = "heading"
 
     return render(request, template, context)
