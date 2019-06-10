@@ -1,4 +1,6 @@
-<h1>Iterating</h1>
+{% if current_iteration and total_iterations %}
+<h1>Iterating {{ current_iteration }}/{{ total_iterations }}</h1>
+{% endif %}
 
 <!-- Display the results -->
 {% if results %}

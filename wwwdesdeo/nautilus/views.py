@@ -125,6 +125,11 @@ def method_iteration(request):
     context["forms"] = {}
     last_results = sf.current_view.last_iteration
     context["results"] = last_results
+    total_iterations = sf.current_view.user_iters
+    current_iteration = sf.current_view.user_iters -\
+        sf.current_view.current_iter
+    context["current_iteration"] = current_iteration
+    context["total_iterations"] = total_iterations
 
     if request.method == "POST":
         for pref in preferences:
@@ -139,6 +144,12 @@ def method_iteration(request):
                 index = int(data["choice"])
                 # convert to a tuple containing lists of floats
                 preference = list(zip(*last_results.values()))[index]
+                # check end condition
+                print(current_iteration)
+                print(total_iterations)
+                if current_iteration + 1 == total_iterations:
+                    return redirect(reverse("method_results"))
+
                 sf.current_view.iterate(preference)
                 return redirect(reverse("method_iteration"))
             else:
@@ -153,3 +164,14 @@ def method_iteration(request):
         return render(request, template, context)
 
     return redirect(reverse("index"))
+
+
+def method_results(request):
+    # Every method should have their own templates
+    template_dir = "nautilus/" + sf.current_view.template_dir
+    template = template_dir + "/iterate.html"
+    final_results = sf.current_view.last_iteration
+    context = {}
+    context["results"] = final_results
+
+    return render(request, template, context)

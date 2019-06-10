@@ -164,7 +164,7 @@ class ENautilusView(NautilusView):
 
     def initialize(self, **kwargs):
         if kwargs:
-            self.user_iters = kwargs["User iterations"]
+            self.user_iters = int(kwargs["User iterations"])
             self.current_iter = self.user_iters
             self.n_generated_points = int(kwargs["Number of generated points"])
 

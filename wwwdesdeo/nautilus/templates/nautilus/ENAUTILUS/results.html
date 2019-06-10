@@ -1,0 +1,17 @@
+<!-- Show final results -->
+{% if results %}
+<h2>Results</h2>
+<table style="width:100%">
+  {% for key, value in results.items %}
+  <tr>
+    <th>{{ key }}</th>
+  </tr>
+  {% for entry in value %}
+  <tr>
+    <td>{{ forloop.counter0 }}</td>
+    <td>{{ entry }}</td>
+  </tr>
+  {% endfor %}
+  {% endfor %}
+</table>
+{% endif %}
