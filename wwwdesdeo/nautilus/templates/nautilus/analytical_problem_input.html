@@ -1,27 +1,19 @@
-<!-- script taken from https://medium.com/all-about-django/adding-forms-dynamically-to-a-django-formset-375f1090c2b0 (10.6.2019), credit to the original author -->
-<script src="formset.js"></script>
+{% load static %}
+<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+<script type="text/javascript" src="{% static 'nautilus/formset.js' %}"></script>
 
-<form class="form-horizontal" method="POST" action="">
-{% csrf_token %}
+
 {{ formset.management_form }}
-{% for form in formset %}
-<div class="row form-row spacer">
-    <div class="col-2">
-        <label>{{form.name.label}}</label>
-    </div>
-    <div class="col-4">
-        <div class="input-group">
-            {{form.name}}
-            <div class="input-group-append">
-                <button class="btn btn-success add-form-row">+</button>
-            </div>
-        </div>
-    </div>
+<div id="form_set">
+    {% for form in formset.forms %}
+        <table class='no_error'>
+            {{ form.as_table }}
+        </table>
+    {% endfor %}
 </div>
-{% endfor %}
-<div class="row spacer">
-    <div class="col-4 offset-2">
-        <button type="submit" class="btn btn-block btn-primary">Create</button>
-    </div>
+<input type="button" value="Add More" id="add_more">
+<div id="empty_form" style="display:none">
+    <table class='no_error'>
+        {{ formset.empty_form.as_table }}
+    </table>
 </div>
-</form>
