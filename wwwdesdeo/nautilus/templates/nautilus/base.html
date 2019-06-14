@@ -1,0 +1,24 @@
+{% load static %}
+{{ static }}
+<!DOCTYPE html>
+<head>
+  <link rel="stylesheet" type="text/css" href="{% static 'nautilus/style.css' %}">
+  {% block style %}{% endblock %}
+</head>
+<html lang="en">
+  <header>
+    {% block header %}{% endblock %}
+  </header>
+  <body>
+    {% block body %}{% endblock %}
+  </body>
+  <footer>
+   <div id="footer-links">
+     <a href="{% url 'index' %}">Method index</a>
+   </div>
+  </footer>
+  <script type="text/javascript" src="{% static 'scripts/jquery-3.4.1.min.js' %}"></script>
+   <script type="text/javascript" src="{% static 'scripts/test.js' %}"></script>
+  {% block scripts %}{% endblock %}
+</html>
+

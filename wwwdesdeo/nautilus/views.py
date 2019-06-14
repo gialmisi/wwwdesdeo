@@ -80,7 +80,9 @@ def method_initialization(request):
 
     context = {
         "requirements": requirements,
+        "help": sf.current_view.help,
         }
+
     if request.method == "POST":
         form = MethodInitializationForm(
             requirements,

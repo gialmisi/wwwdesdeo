@@ -36,6 +36,7 @@ class NautilusView():
         self.__initialization_requirements = None
         self.__preference_requirements = None
         self.__last_iteration = None
+        self.__help = None
 
     @property
     def method(self):
@@ -105,6 +106,14 @@ class NautilusView():
     def last_iteration(self, val):
         self.__last_iteration = val
 
+    @property
+    def help(self):
+        return self.__help
+
+    @help.setter
+    def help(self, val):
+        self.__help = val
+
 
 class ENautilusView(NautilusView):
     """Specialization of the NautilusView class for the Enhanced NAUTILUS method.
@@ -130,6 +139,16 @@ class ENautilusView(NautilusView):
             ]
         self.last_iteration = None
         self.__total_points_returned = 0
+        self.help = {
+            "name": "NAUTILUS Enhanced",
+            "description": "NAUTILUS enhanced iterates a presolved problem "
+            "starting from the nadir point. During each iteration, the "
+            "decision maker is shown a set of points from which they must "
+            "select the most preferred one. Using the selected points, a new "
+            "set of points is calculated and the decision maker is asked once "
+            "again to select their most preferred point. This is repeated "
+            "unstil a solution on the pareto optimal front in reached."
+        }
 
     @property
     def user_iters(self):
