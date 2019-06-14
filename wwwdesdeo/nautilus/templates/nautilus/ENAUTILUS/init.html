@@ -1,19 +1,17 @@
 {% extends "../base.html" %}
+
 {% block header %}
 <h1>{{ help.name|default:"title" }}</h1>
-<div id="help"><p>{{ help.description }}</p></div>
 {% endblock %}
+
 {% block body %}
-<form action="" method="post">
-  {% csrf_token %}
-  {{ form }}
-  <input type="submit" value="Set">
-</form>
-{% endblock %}
-{% block scripts %}
-<script>
-  $(document).ready(() => {
-      console.log("hello");
-  })
-</script>
+<div id="input-div"
+     <form action="" method="POST">
+       {% csrf_token %}
+       {{ form }}
+       <input type="submit" value="Set">
+     </form>
+     <div id="method-help-button"><input type="button" value="Help"></div>
+</div>
+<div id="help"><p>{{ help.description }}</p></div>
 {% endblock %}

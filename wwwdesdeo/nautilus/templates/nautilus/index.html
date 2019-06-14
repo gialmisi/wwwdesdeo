@@ -1,14 +1,15 @@
 {% extends "./base.html" %}
 
 {% block header %}
-{% if help %}
-<h1>{{ help }}</h1>
-{% endif %}
+<h1>{{ help|default:"Index" }}</h1>
 {% endblock %}
+
 {% block body %}
-<form action="" method="post">
-  {% csrf_token %}
-  {{ form }}
-  <input type="submit" value="Set">
-</form>
+<div id="input-div">
+  <form action="" method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Set"/>
+  </form>
+</div>
 {% endblock %}
