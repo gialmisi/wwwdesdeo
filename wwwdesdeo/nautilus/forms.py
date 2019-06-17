@@ -67,12 +67,34 @@ class AnalyticalProblemInputForm(forms.Form):
 
     """
     expression = forms.CharField(
-        label="Expression",
+        label="",
         max_length=100,
         widget=forms.TextInput(attrs={
-            "class": 'form-control',
-            "placeholder": "expression"}),
-        required=False)
+            "class": "row-form-exprs",
+            "placeholder": "expression",
+        }),
+        required=False,
+    )
+
+    lower_bound = forms.FloatField(
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "class": "row-form-bound",
+                "placeholder": "low",
+            },
+        )
+    )
+
+    upper_bound = forms.FloatField(
+        label="",
+        widget=forms.TextInput(
+            attrs={
+                "class": "row-form-bound",
+                "placeholder": "up",
+            },
+        )
+    )
 
 
 AnalyticalProblemInputFormSet = formset_factory(AnalyticalProblemInputForm,

@@ -119,6 +119,7 @@ def method_iteration(request):
     # Every method has its' own preference requirements for iterating
     preferences = sf.current_view.preference_requirements
     context = {}
+    context["title"] = "Iterating"
 
     # Iterate for the first time
     if sf.current_view.is_first_iteration:
@@ -184,13 +185,14 @@ def method_results(request):
 def analytical_problem_input(request):
     template = "nautilus/analytical_problem_input.html"
     context = {}
+    context["title"] = "Problem input"
 
     if request.method == "POST":
         # handle filled form
+        print(request.POST)
         pass
     else:
         formset = AnalyticalProblemInputFormSet()
         context["formset"] = formset
-        context["heading"] = "heading"
 
     return render(request, template, context)

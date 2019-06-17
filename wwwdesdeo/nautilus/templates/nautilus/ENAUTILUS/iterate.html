@@ -4,13 +4,7 @@
 
 <!-- Display the header with the current iteration and total iterations -->
 {% block header %}
-{% if current_iteration and total_iterations %}
-<h1>Iterating {{ current_iteration }}/{{ total_iterations|default:"title" }}</h1>
-{% else %}
-{% if title %}
-<h1>{{ title|default:"title" }}</h1>
-{% endif %}
-{% endif %}
+<h2>{{ title|default:"title" }}({{ current_iteration|default:"cur iter" }}/{{ total_iterations|default:"tot iter" }})</h2>
 {% endblock %}
 
 <!-- Display the results of the iteration -->
@@ -40,10 +34,10 @@
 {% for key, value in forms.items %}
 <h3>{{ key }}</h3>
 <form action="" method="post">
-  {% csrf_token %}
-  {{ value }}
-  {% endfor %}
   <div id="input-div">
+    {% csrf_token %}
+    {{ value }}
+    {% endfor %}
     <input type="submit" value="Submit">
   </div>
 </form>

@@ -1,19 +1,28 @@
-{% load static %}
-<script type="text/javascript" src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
-<script type="text/javascript" src="{% static 'nautilus/formset.js' %}"></script>
+{% extends "./base.html" %}
 
+{% block header %}
+<h1>{{ title|default:"title" }}</h1>
+{% endblock %}
 
+{% block body %}
+<div id="input-div">
 {{ formset.management_form }}
-<div id="form_set">
-    {% for form in formset.forms %}
-        <table class='no_error'>
-            {{ form.as_table }}
-        </table>
-    {% endfor %}
+{% for form in formset.forms %}
+<form action="" method="post" enctype="multipart/form-data">
+  {% csrf_token %}
+  <div id="formset">
+    {{ form }}
+  </div>
+  <input type="button" value="Add More" id="add-more">
+  <input type="submit" value="Submit">
+</form>
+{% endfor %}
+
+<div id="empty-form" style="display:none">
+  {{ formset.empty_form }}
 </div>
-<input type="button" value="Add More" id="add_more">
-<div id="empty_form" style="display:none">
-    <table class='no_error'>
-        {{ formset.empty_form.as_table }}
-    </table>
 </div>
+{% endblock %}
+
+
+
