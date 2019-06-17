@@ -1,26 +1,40 @@
-{% if current_iteration and total_iterations %}
-<h1>Iterating {{ current_iteration }}/{{ total_iterations }}</h1>
-{% endif %}
+<!-- Show the intermediate and final results. Allow the DM to make appropiate
+     choices between each iteration. -->
+{% extends "../base.html" %}
 
-<!-- Display the results -->
-{% if results %}
-<h2>Results</h2>
-<table style="width:100%">
-  {% for key, value in results.items %}
-  <tr>
-    <th>{{ key }}</th>
-  </tr>
-  {% for entry in value %}
-  <tr>
-    <td>{{ forloop.counter0 }}</td>
-    <td>{{ entry }}</td>
-  </tr>
-  {% endfor %}
-  {% endfor %}
-</table>
+<!-- Display the header with the current iteration and total iterations -->
+{% block header %}
+{% if current_iteration and total_iterations %}
+<h1>Iterating {{ current_iteration }}/{{ total_iterations|default:"title" }}</h1>
+{% else %}
+{% if title %}
+<h1>{{ title|default:"title" }}</h1>
 {% endif %}
+{% endif %}
+{% endblock %}
+
+<!-- Display the results of the iteration -->
+{% block body %}
+<div id="show-div">
+  {% if results %}
+  <table>
+    {% for key, value in results.items %}
+    <tr>
+      <th>{{ key }}</th>
+    </tr>
+    {% for entry in value %}
+    <tr>
+      <td>{{ forloop.counter0 }}</td>
+      <td>{{ entry }}</td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+  </table>
+  {% endif %}
+</div>
 
 <!-- Ask for preference -->
+<div id="input-div">
 {% if forms %}
 <h2>Decisions</h2>
 {% for key, value in forms.items %}
@@ -28,7 +42,11 @@
 <form action="" method="post">
   {% csrf_token %}
   {{ value }}
-  <input type="submit" value="Submit">
+  {% endfor %}
+  <div id="input-div">
+    <input type="submit" value="Submit">
+  </div>
 </form>
-{% endfor %}
 {% endif %}
+</div>
+{% endblock %}

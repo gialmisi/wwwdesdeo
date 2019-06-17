@@ -82,7 +82,7 @@ def method_initialization(request):
         "requirements": requirements,
         "help": sf.current_view.help,
         }
-
+    print(request)
     if request.method == "POST":
         form = MethodInitializationForm(
             requirements,
@@ -175,6 +175,7 @@ def method_results(request):
     template = template_dir + "/iterate.html"
     final_results = sf.current_view.last_iteration
     context = {}
+    context["title"] = "Results"
     context["results"] = final_results
 
     return render(request, template, context)

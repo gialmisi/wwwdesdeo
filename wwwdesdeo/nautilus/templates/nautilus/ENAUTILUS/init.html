@@ -1,11 +1,16 @@
+<!-- Displays a page for the user to specify details about the interactive
+     optimization method. -->
 {% extends "../base.html" %}
 
+<!-- Displays the title -->
 {% block header %}
 <h1>{{ help.name|default:"title" }}</h1>
 {% endblock %}
 
+<!-- Displays a form for the user to input options. These options are vary
+     depending on which NAUTILUS method was chosen on the previous page. -->
 {% block body %}
-<div id="input-div"
+<div id="input-div">
      <form action="" method="POST">
        {% csrf_token %}
        {{ form }}
@@ -13,5 +18,7 @@
      </form>
      <div id="method-help-button"><input type="button" value="Help"></div>
 </div>
+
+<!-- Displays a method specific help dialog when the 'help' button is pressed. -->
 <div id="help"><p>{{ help.description }}</p></div>
 {% endblock %}
