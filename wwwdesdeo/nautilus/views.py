@@ -6,6 +6,7 @@ from .forms import (InitializationForm,
                     MethodInitializationForm,
                     IterationForm,
                     AnalyticalProblemInputFormSet)
+from .expression_parser import parse, ExpressionException
 
 
 def index(request):
@@ -189,8 +190,21 @@ def analytical_problem_input(request):
 
     if request.method == "POST":
         # handle filled form
-        print(request.POST)
-        pass
+        formset = AnalyticalProblemInputFormSet(request.POST)
+        if formset.is_valid():
+            data = formset.cleaned_data
+            try:
+                expressions, symbols = parse(data)
+            except ExpressionException as err:
+                context["message"] = str(err)
+                template = "nautilus/error.html"
+                return render(request, template, context)
+            # TODO: Ask for decision variable bounds
+
+        else:
+            context["message"] = "Form is invalid"
+            template = "nautilus/error.html"
+            return render(request, template, context)
     else:
         formset = AnalyticalProblemInputFormSet()
         context["formset"] = formset

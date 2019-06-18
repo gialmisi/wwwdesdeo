@@ -1,6 +1,33 @@
 import models as m
+from desdeo.problem import MOProblem
+from expression_parser import parse
+
 
 current_view = None
+
+
+class AnalyticalProblem(MOProblem):
+    def __init__(self, expressions, symbols):
+        __nobj = len(expressions)
+        # TODO: Handle no bounds
+        # TODO: objective funcions names
+        # TODO: maximize of minimize?
+        self.__objectives = [e[0] for e in expressions]
+        __ideal = [e[1] for e in expressions]
+        __nadir = [e[2] for e in expressions]
+        self.__symbols = symbols
+        super().__init__(
+            nobj=__nobj,
+            ideal=__ideal,
+            nadir=__nadir,)
+
+    def evaluate(self, population):
+        for values in population:
+            sdict = dict(zip((key for key in symbols), values))
+            print(sdict)
+            res = list(map(lambda obj: obj(sdict), self.__objectives))
+
+            return res
 
 
 class NautilusView():
@@ -223,3 +250,19 @@ class ENautilusView(NautilusView):
 available_method_views_d = {
     "ENAUTILUS": ENautilusView,
     }
+
+
+# TESTIN DELETE ME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+__example_valid = [
+    {'expression': 'x + y + z', 'lower_bound': 0.0, 'upper_bound': 5.0},
+    {'expression': 'x - z / y * 3', 'lower_bound': 33, 'upper_bound': 40.0},
+    {'expression': '10 * x + 9', 'lower_bound': -1, 'upper_bound': 1},
+    ]
+
+expressions, symbols = parse(__example_valid)
+
+anal = AnalyticalProblem(expressions, symbols)
+print(anal.nof_objectives())
+print(anal.evaluate([[1, 2, 3]]))

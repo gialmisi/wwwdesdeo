@@ -1,6 +1,12 @@
-{% if message %}
-<p>Oops... {{ message }}</p>
-{% else %}
-<p> Now you done it! Something has SERIOUSLY gone wrong!</p>
-{% endif %}
-<a href="/nautilus/"> Return to problem specification</a>
+{% extends './base.html' %}
+
+{% block header %}
+<h1>ERROR</h1>
+{% endblock %}
+
+{% block body %}
+<div id="show-div">
+  <p>The following error was encountered:</p>
+  <h2>{{ message|default:"Missing error message!" }}</h2>
+</div>
+{% endblock %}

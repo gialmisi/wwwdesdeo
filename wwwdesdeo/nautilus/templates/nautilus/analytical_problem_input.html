@@ -6,9 +6,9 @@
 
 {% block body %}
 <div id="input-div">
-{{ formset.management_form }}
 {% for form in formset.forms %}
 <form action="" method="post" enctype="multipart/form-data">
+  {{ formset.management_form }}
   {% csrf_token %}
   <div id="formset">
     {{ form }}

@@ -2,7 +2,9 @@ from functools import reduce
 
 from django.test import TestCase, tag
 from .stateful_view import ENautilusView, NautilusView
-from .expression_parser import exprs_to_lambda, free_symbols_dict
+from .expression_parser import (exprs_to_lambda,
+                                free_symbols_dict,
+                                ExpressionException,)
 
 
 @tag("stateful_view")
@@ -53,6 +55,7 @@ class NautilusView_test(TestCase):
         self.assertAlmostEqual(c.last_iteration, [5.0, 2.0, -3.33])
 
 
+@tag("stateful_view")
 class ENautilusView_test(TestCase):
     def test_setters_and_getters(self):
         # user_iters
@@ -133,7 +136,6 @@ class ENautilusView_test(TestCase):
         self.assertFalse(compare_dicts(curr, last))
 
 
-@tag("stateful_view")
 def compare_dicts(this, that):
     eps = 0.001
     ress = []
@@ -151,27 +153,45 @@ class expression_parser_test(TestCase):
         """Test that a simple string is properly parsed into a callable expression.
         """
         str_input = "x + y"
-        lam = exprs_to_lambda(str_input)
-        self.assertAlmostEqual(lam(5, 6), 11)
+        lam, _ = exprs_to_lambda(str_input)
+        sdict = {'y': 6, 'x': 5}
+        self.assertAlmostEqual(lam(sdict), 11)
 
     def test_free_symbols_dict(self):
         """Test that the right free symbols are extracted from a simple string input.
         """
         str_input = "x - y / z"
+        lam, _ = exprs_to_lambda(str_input)
         sdict = free_symbols_dict(str_input)
-        lam = exprs_to_lambda(str_input)
         sdict["x"] = 5
         sdict["y"] = 7
         sdict["z"] = 13
-        self.assertAlmostEqual(lam(**sdict), 4.46153846154)
+        self.assertAlmostEqual(lam(sdict), 4.46153846154)
 
     def test_exprs_to_lambda_complex(self):
         """A more complex test"""
         str_input = "cos(x*pi) + x**2 - y / sqrt(z) + a*y"
+        lam, _ = (exprs_to_lambda(str_input))
         sdict = free_symbols_dict(str_input)
-        lam = (exprs_to_lambda(str_input))
         sdict["x"] = -5.1
         sdict["y"] = 1.2
         sdict["z"] = 9.3
         sdict["a"] = -0.004
-        self.assertAlmostEqual(lam(**sdict), 24.66064798223447)
+        self.assertAlmostEqual(lam(sdict), 24.66064798223447)
+
+    def test_extra_arguments(self):
+        """ Test if the lamdifyed expression can handle unnecessary arguments.
+        """
+        str_input = "x + y"
+        lam, _ = exprs_to_lambda(str_input)
+        self.assertEqual(lam({"x": 4, "y": 5, "z": 10}), 9)
+
+    def test_too_few_arguments(self):
+        """ Test if the expression can handle too few arguments.
+        """
+        str_input = "x + y + z"
+        lam, _ = exprs_to_lambda(str_input)
+        sdict = {"x": 5, "y": -3}
+
+        with self.assertRaises(ExpressionException):
+            lam(sdict)
