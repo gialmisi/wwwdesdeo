@@ -18,3 +18,7 @@ itself. -->
   </form>
 </div>
 {% endblock %}
+
+{% block help %}
+{{ description|default:"description" }}
+{% endblock %}

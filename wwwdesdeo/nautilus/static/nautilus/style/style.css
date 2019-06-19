@@ -5,6 +5,17 @@ HEX: #e6e2d3
 HEX: #c4b7a6
 */
 
+/* Disable the scroll buttons on number inputs. Works for both chrome and firefox.*/
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+input[type=number] {
+    -moz-appearance:textfield;
+}
+
 __palette_example {
     HEX: #b9936c;
     HEX: #dac292;
@@ -18,6 +29,7 @@ html, body {
     margin: 0;
     padding: 0;
     background: #efefef;
+    font-family: "Arial Black", Gadget, sans-serif;
 }
 
 body {
@@ -40,6 +52,18 @@ header {
     border-bottom: 1px solid #666;
 }
 
+input, select {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    display: inline-block;
+    border: 1px solid #666;
+    background:  #e6e2d3; 
+    border-radius: 4px;
+    box-sizing: border-box;
+    
+}
+
 #footer-links {
     margin-left: 15px;
     margin-top: 5px;
@@ -54,23 +78,29 @@ header {
 }
 
 #help {
-    background: #c4b7a6;
     position: absolute;
-    z-index: 10;
-    width: 25%;
-    height: auto;
-    float: left;
+    background: #c4b7a6;
     display: none;
+    margin-left: 10%;
+    margin-right: 10%;
     padding: 10px;
     border-radius: 20px;
     border: 1px solid #666;
     box-shadow: 0 10px 10px #666;
-    left: 2.5%;
-    top: 20%;
+    /* left: 2.5%; */
+    /* top: 20%; */
+}
+
+#help-button {
+    position: fixed;
+    padding: 5px;
+    margin-left: 40%;
+    margin-top: 5px;
+    width: 8%;
 }
 
 #input-div {
-    width: 25%;
+    width: 50%;
     margin: 0 auto;
 
 }
@@ -82,11 +112,25 @@ header {
     margin: auto;
 }
 
+/* #input-div label { */
+/*     margin: 0; */
+/*     padding: 0; */
+/* } */
+
 #input-div label {
     float: left;
     clear: none;
     display: block;
     padding: 2px 1em 0 0;
+}
+
+#input-div input[type="text"],
+#input-div input[type="number"] {
+    float: left;
+    margin-top: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 10px;
 }
 
 #input-div input[type="radio"] {
@@ -99,17 +143,23 @@ header {
     text-align: center;
 }
 
-input, select {
-    width: 100%;
-    padding: 12px 20px;
-    margin: 8px 0;
+#variable-form label {
+    display: inline-block;
+    float: left;
+    width: 9%;
+    text-align: center;
     display: inline-block;
     border: 1px solid #666;
-    background:  #e6e2d3; 
     border-radius: 4px;
-    box-sizing: border-box;
-    
+    padding: 0;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin: 0;
+    margin-top: 5px;
+    background:  #e6e2d3;
 }
+
+
 
 input[type='submit'] {
     background: #c4b7a6;
@@ -120,12 +170,19 @@ input[type='button'] {
 }
 
 .row-form-bound {
-    width: 23.5%;
+    width: 25%;
     margin: 0;
+    padding: 0;
 }
 
 .row-form-exprs {
     width: 50%;
+    margin: 0;
+    padding: 0;
+}
+
+.row-form-quarter {
+    width: 30%;
     margin: 0;
 }
 

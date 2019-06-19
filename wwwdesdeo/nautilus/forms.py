@@ -97,5 +97,61 @@ class AnalyticalProblemInputForm(forms.Form):
     )
 
 
+class AnalyticalProblemInputVariablesForm(forms.Form):
+    def __init__(self,
+                 symbol,
+                 *args,
+                 **kwargs):
+        super(AnalyticalProblemInputVariablesForm, self).__init__(
+            *args, **kwargs)
+
+        self.fields[symbol+"_lower_bound"] = forms.FloatField(
+            label=symbol,
+            widget=forms.NumberInput(
+                attrs={
+                    "class": "row-form-quarter",
+                    "placeholder": "low",
+                },
+            )
+        )
+
+        self.fields[symbol+"_upper_bound"] = forms.FloatField(
+            label="",
+            widget=forms.NumberInput(
+                attrs={
+                    "class": "row-form-quarter",
+                    "placeholder": "up",
+                },
+            )
+        )
+
+        self.fields[symbol+"_initial_value"] = forms.FloatField(
+            label="",
+            widget=forms.NumberInput(
+                attrs={
+                    "class": "row-form-quarter",
+                    "placeholder": "curr",
+                },
+            )
+        )
+
+
+def VariableFormsFactory(symbols, post=None):
+    forms = []
+    for symbol in symbols:
+        if post is not None:
+            form = AnalyticalProblemInputVariablesForm(symbol, {
+                symbol+"_lower_bound": post[symbol+"_lower_bound"],
+                symbol+"_upper_bound": post[symbol+"_upper_bound"],
+                symbol+"_initial_value": post[symbol+"_initial_value"],
+            })
+        else:
+            form = AnalyticalProblemInputVariablesForm(symbol)
+
+        forms.append(form)
+
+    return forms
+
+
 AnalyticalProblemInputFormSet = formset_factory(AnalyticalProblemInputForm,
                                                 extra=1)

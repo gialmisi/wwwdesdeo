@@ -1,9 +1,11 @@
 import models as m
-from desdeo.problem import MOProblem
+from desdeo.problem import MOProblem, Variable
 from expression_parser import parse
 
 
 current_view = None
+current_expressions = None  # For analytical prolems
+current_symbols = None  # For analytical problems
 
 
 class AnalyticalProblem(MOProblem):
@@ -11,7 +13,7 @@ class AnalyticalProblem(MOProblem):
         __nobj = len(expressions)
         # TODO: Handle no bounds
         # TODO: objective funcions names
-        # TODO: maximize of minimize?
+        # TODO: maximize or minimize?
         self.__objectives = [e[0] for e in expressions]
         __ideal = [e[1] for e in expressions]
         __nadir = [e[2] for e in expressions]
@@ -22,12 +24,12 @@ class AnalyticalProblem(MOProblem):
             nadir=__nadir,)
 
     def evaluate(self, population):
+        res = []
         for values in population:
             sdict = dict(zip((key for key in symbols), values))
-            print(sdict)
-            res = list(map(lambda obj: obj(sdict), self.__objectives))
+            res.append(list(map(lambda obj: obj(sdict), self.__objectives)))
 
-            return res
+        return res
 
 
 class NautilusView():
@@ -52,7 +54,10 @@ class NautilusView():
         """
         _method = m.available_methods_d[method]
         _optimizer = m.available_optimizers_d[optimizer]
-        _problem = m.problems_d[problem]
+        if isinstance(problem, str):
+            _problem = m.problems_d[problem]
+        else:
+            _problem = problem
 
         self.__method = _method(_problem, _optimizer)
         self.__nadir = self.method.problem.nadir
@@ -151,6 +156,7 @@ class ENautilusView(NautilusView):
                  optimizer="SciPyDE",
                  problem="River Pollution"
                  ):
+        # self.problem = m.problems_d[problem] # DELETE ME
 
         super().__init__(method, optimizer, problem)
         self.__user_iters = 5
@@ -255,14 +261,26 @@ available_method_views_d = {
 # TESTIN DELETE ME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 
-__example_valid = [
-    {'expression': 'x + y + z', 'lower_bound': 0.0, 'upper_bound': 5.0},
-    {'expression': 'x - z / y * 3', 'lower_bound': 33, 'upper_bound': 40.0},
-    {'expression': '10 * x + 9', 'lower_bound': -1, 'upper_bound': 1},
-    ]
+# __example_valid = [
+#     {'expression': 'x + y + z', 'lower_bound': 0.0, 'upper_bound': 20.0},
+#     {'expression': 'x - z / y * 3', 'lower_bound': 33, 'upper_bound': 40.0},
+#     {'expression': '10 * x + 9', 'lower_bound': -1, 'upper_bound': 500},
+#     ]
 
-expressions, symbols = parse(__example_valid)
+# expressions, symbols = parse(__example_valid)
 
-anal = AnalyticalProblem(expressions, symbols)
-print(anal.nof_objectives())
-print(anal.evaluate([[1, 2, 3]]))
+# anal = AnalyticalProblem(expressions, symbols)
+
+# # Add vars
+# anal.add_variables([
+#     Variable(bounds=[0, 10], name='x', starting_point=2),
+#     Variable(bounds=[2, 5], name='y', starting_point=3),
+#     Variable(bounds=[6, 10], name='z', starting_point=7)
+# ])
+
+# view = ENautilusView(problem=anal)
+
+# kwargs = {"User iterations": 5, "Number of generated points": 5}
+# view.initialize(**kwargs)
+
+# print(view.iterate())

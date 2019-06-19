@@ -1,0 +1,17 @@
+{% extends "./base.html" %}
+
+{% block header %}
+<h1>{{ title|default:"title" }}</h1>
+{% endblock %}
+
+{% block body %}
+<div id="input-div">
+  <form action="" method="post" id="variable-form">
+    {% csrf_token %}
+    {% for form in forms %}
+      {{ form }}
+    {% endfor %}
+    <input type="submit" value="Submit">
+  </form>
+</div>
+{% endblock %}

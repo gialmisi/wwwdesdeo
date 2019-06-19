@@ -12,11 +12,15 @@
 <html lang="en">
   <header>
     <!-- Header to be displayed -->
+    <input type="button" value="Toggle help" id="help-button">
     {% block header %}{% endblock %}
   </header>
   <body>
     <!-- The actual content of the page -->
     {% block body %}{% endblock %}
+    <div id="help">
+      {% block help %}{% endblock %}
+    </div>
   </body>
   <footer>
     <!-- The footer to be displayed. By default, has a back link. -->

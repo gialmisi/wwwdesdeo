@@ -5,7 +5,8 @@ import models as m
 from .forms import (InitializationForm,
                     MethodInitializationForm,
                     IterationForm,
-                    AnalyticalProblemInputFormSet)
+                    AnalyticalProblemInputFormSet,
+                    VariableFormsFactory,)
 from .expression_parser import parse, ExpressionException
 
 
@@ -35,7 +36,7 @@ def index(request):
             data = form.cleaned_data
             if data["problem"] == "Custom":
                 # ask the DM to specify a custom problem
-                return redirect(reverse("analytical_problem_input"))
+                return redirect(reverse("analytical_problem_input_objectives"))
             else:
                 method = data["interactive_method"]
                 optimizer = data["optimizer"]
@@ -81,7 +82,8 @@ def method_initialization(request):
 
     context = {
         "requirements": requirements,
-        "help": sf.current_view.help,
+        "description": sf.current_view.help["description"],
+        "title": sf.current_view.help["name"],
         }
     print(request)
     if request.method == "POST":
@@ -183,10 +185,10 @@ def method_results(request):
     return render(request, template, context)
 
 
-def analytical_problem_input(request):
-    template = "nautilus/analytical_problem_input.html"
+def analytical_problem_input_objectives(request):
+    template = "nautilus/analytical_problem_input_objectives.html"
     context = {}
-    context["title"] = "Problem input"
+    context["title"] = "Objective specification"
 
     if request.method == "POST":
         # handle filled form
@@ -195,11 +197,14 @@ def analytical_problem_input(request):
             data = formset.cleaned_data
             try:
                 expressions, symbols = parse(data)
+                sf.current_expressions = expressions
+                sf.current_symbols = symbols
+                return redirect(reverse("analytical_problem_input_variables"))
+
             except ExpressionException as err:
                 context["message"] = str(err)
                 template = "nautilus/error.html"
                 return render(request, template, context)
-            # TODO: Ask for decision variable bounds
 
         else:
             context["message"] = "Form is invalid"
@@ -208,5 +213,25 @@ def analytical_problem_input(request):
     else:
         formset = AnalyticalProblemInputFormSet()
         context["formset"] = formset
+
+    return render(request, template, context)
+
+
+def analytical_problem_input_variables(request):
+    template = "nautilus/analytical_problem_input_variables.html"
+    context = {}
+    context["title"] = "Decision variable specification"
+
+    if request.method == "POST":
+        # handle filled form
+        forms = VariableFormsFactory(sf.current_symbols, request.POST)
+        for f in forms:
+            f.is_valid()
+            print(f.cleaned_data)
+        pass
+    else:
+        # create empty form
+        forms = VariableFormsFactory(sf.current_symbols)
+        context["forms"] = forms
 
     return render(request, template, context)
