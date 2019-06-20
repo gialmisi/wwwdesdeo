@@ -4,7 +4,7 @@
 
 <!-- Display the header with the current iteration and total iterations -->
 {% block header %}
-<h2>{{ title|default:"title" }}({{ current_iteration|default:"cur iter" }}/{{ total_iterations|default:"tot iter" }})</h2>
+{{ title|default:"title" }}({{ current_iteration|default:"cur iter" }}/{{ total_iterations|default:"tot iter" }})
 {% endblock %}
 
 <!-- Display the results of the iteration -->

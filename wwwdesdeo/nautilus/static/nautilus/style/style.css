@@ -66,7 +66,7 @@ input, select {
 
 #footer-links {
     margin-left: 15px;
-    margin-top: 5px;
+    margin-bottom: 3px;
     float: left;
 }
 
@@ -74,6 +74,7 @@ input, select {
     position: absolute;
     right: 0;
     margin-right: 15px;
+    display: inline-block;
     float: right;
 }
 
@@ -87,15 +88,14 @@ input, select {
     border-radius: 20px;
     border: 1px solid #666;
     box-shadow: 0 10px 10px #666;
-    /* left: 2.5%; */
-    /* top: 20%; */
 }
 
 #help-button {
     position: fixed;
     padding: 5px;
-    margin-left: 40%;
-    margin-top: 5px;
+    right: 0;
+    margin-right: 15px;
+    margin-top: 25px;
     width: 8%;
 }
 
@@ -199,7 +199,7 @@ footer {
     position: fixed;
     bottom: 0;
     width: 100%;
-    height: 30px;
+    height: auto;
     background: #c4b7a6;
     margin-top: 30px;
     border-top: 1px solid #666;

@@ -8,6 +8,7 @@ from .forms import (InitializationForm,
                     AnalyticalProblemInputFormSet,
                     VariableFormsFactory,)
 from .expression_parser import parse, ExpressionException
+from .misc import analytical_problem_to_latex
 
 
 def index(request):
@@ -34,21 +35,33 @@ def index(request):
             request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            if data["problem"] == "Custom":
-                # ask the DM to specify a custom problem
-                return redirect(reverse("analytical_problem_input_objectives"))
-            else:
-                method = data["interactive_method"]
-                optimizer = data["optimizer"]
-                problem = data["problem"]
+            try:
+                if data["problem"] == "Custom":
+                    # ask the DM to specify a custom problem
+                    method = data["interactive_method"]
+                    optimizer = data["optimizer"]
 
-                sf_view = sf.available_method_views_d[method](
-                    method,
-                    optimizer,
-                    problem)
-                sf.current_view = sf_view
-                # Initialize the chosen method
-                return redirect(reverse("method_initialization"))
+                    # Save the options for later use
+                    sf.method = method
+                    sf.optimizer = optimizer
+                    return redirect(
+                        reverse("analytical_problem_input_objectives"))
+                else:
+                    method = data["interactive_method"]
+                    optimizer = data["optimizer"]
+                    problem = data["problem"]
+
+                    sf_view = sf.available_method_views_d[method](
+                        method,
+                        optimizer,
+                        problem)
+                    sf.current_view = sf_view
+                    # Initialize the chosen method
+                    return redirect(reverse("method_initialization"))
+            except KeyError as e:
+                context["message"] = "Key error " + str(e)
+                template = "nautilus/error.html"
+
         else:
             context["message"] = "Form is invalid"
             template = "nautilus/error.html"
@@ -152,9 +165,8 @@ def method_iteration(request):
                 # convert to a tuple containing lists of floats
                 preference = list(zip(*last_results.values()))[index]
                 # check end condition
-                print(current_iteration)
-                print(total_iterations)
                 if current_iteration + 1 == total_iterations:
+                    sf.current_view.iterate(preference)
                     return redirect(reverse("method_results"))
 
                 sf.current_view.iterate(preference)
@@ -196,7 +208,8 @@ def analytical_problem_input_objectives(request):
         if formset.is_valid():
             data = formset.cleaned_data
             try:
-                expressions, symbols = parse(data)
+                expressions, symbols, sympy_exprs = parse(data)
+                sf.current_sympy_exprs = sympy_exprs
                 sf.current_expressions = expressions
                 sf.current_symbols = symbols
                 return redirect(reverse("analytical_problem_input_variables"))
@@ -224,14 +237,48 @@ def analytical_problem_input_variables(request):
 
     if request.method == "POST":
         # handle filled form
+        sf.current_variables = []
         forms = VariableFormsFactory(sf.current_symbols, request.POST)
         for f in forms:
-            f.is_valid()
-            print(f.cleaned_data)
-        pass
+            if f.is_valid():
+                sf.current_variables.append(f.cleaned_data)
+            else:
+                template = "nautilus/error.html"
+                context["message"] = "Form is invalid"
+                return render(request, template, context)
+
+        return redirect(reverse("analytical_problem_confirm"))
     else:
         # create empty form
         forms = VariableFormsFactory(sf.current_symbols)
         context["forms"] = forms
 
     return render(request, template, context)
+
+
+def analytical_problem_confirm(request):
+    template = "nautilus/analytical_problem_confirm.html"
+    context = {}
+    context["title"] = "Confirm analytical problem"
+    l_objs, l_vars = analytical_problem_to_latex(
+        sf.current_sympy_exprs,
+        sf.current_symbols,
+        sf.current_variables)
+    context["latex_objectives"] = l_objs
+    context["latex_variables"] = l_vars
+
+    return render(request, template, context)
+
+
+def analytical_problem_optimize(request):
+    problem = sf.AnalyticalProblem(
+        sf.current_expressions,
+        sf.current_symbols,
+        sf.current_variables
+        )
+    sf_view = sf.available_method_views_d[sf.method](
+        sf.method,
+        sf.optimizer,
+        problem)
+    sf.current_view = sf_view
+    return redirect(reverse("method_initialization"))

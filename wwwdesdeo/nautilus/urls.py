@@ -16,4 +16,10 @@ urlpatterns = [
     path("analytical_problem_input_variables.html",
          views.analytical_problem_input_variables,
          name="analytical_problem_input_variables"),
+    path("analytical_problem_confirm.html",
+         views.analytical_problem_confirm,
+         name="analytical_problem_confirm"),
+    path("analytical_problem_optimize.html",
+         views.analytical_problem_optimize,
+         name="analytical_problem_optimize"),
     ]

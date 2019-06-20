@@ -1,6 +1,9 @@
 <!-- Show final results -->
+{% block header %}
+Results
+{% endblock %}
+{% block body %}
 {% if results %}
-<h2>Results</h2>
 <table style="width:100%">
   {% for key, value in results.items %}
   <tr>
@@ -15,3 +18,5 @@
   {% endfor %}
 </table>
 {% endif %}
+{% endblock %}
+

@@ -1,0 +1,44 @@
+{% extends "./base.html" %}
+{% block header %}
+{{ title }}
+{% endblock %}
+
+{% block body %}
+<div id="show-div">
+  <!-- LaTeX begin -->
+  <h2>MOO problem</h2>
+  \begin{equation}
+  \begin{array}{llll}
+  % Objectives
+  {% for obj in latex_objectives %}
+  \min & {{ obj.0 }} & \in & \left({{ obj.1 }}, {{ obj.2 }}\right) \\
+  {% endfor %}
+  % Constraints
+  \textrm{s.t.} \\
+  {% for var in latex_variables %}
+  & {{ var.0 }} & \in & \left({{ var.2 }}, {{ var.1 }}\right) \\
+  {% endfor %}
+  \end{array}
+  \end{equation}
+  <!-- LaTeX end -->
+</div>
+<div id="input-div">
+  <form action="{% url 'analytical_problem_optimize' %}" method="get">
+    <input type="submit" value="This is ok">
+  </form>
+  <form action="{% url 'index' %}" method="get">
+    <input type="submit" value="Return to index">
+  </form>
+</div>
+{% endblock %}
+
+{% block help %}
+<p>This page shows the problem inputted by the user and asks if it is right.</p>
+{% endblock %}
+
+{% block scripts%}
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+{% endblock %}
+

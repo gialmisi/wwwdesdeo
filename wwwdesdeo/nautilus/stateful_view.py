@@ -3,30 +3,48 @@ from desdeo.problem import MOProblem, Variable
 from expression_parser import parse
 
 
-current_view = None
-current_expressions = None  # For analytical prolems
-current_symbols = None  # For analytical problems
+current_view = None  # Active view
+current_expressions = None  # For analytical prolems (functions)
+current_sympy_exprs = None  # Sympy expressions
+current_symbols = None  # For analytical problems (set)
+current_variables = None  # For analytical problems (upper, lower, curr)
+optimizer = None
+method = None
 
 
 class AnalyticalProblem(MOProblem):
-    def __init__(self, expressions, symbols):
-        __nobj = len(expressions)
+    def __init__(self, objectives, symbols, variables):
+        __nobj = len(objectives)
         # TODO: Handle no bounds
         # TODO: objective funcions names
         # TODO: maximize or minimize?
-        self.__objectives = [e[0] for e in expressions]
-        __ideal = [e[1] for e in expressions]
-        __nadir = [e[2] for e in expressions]
+        self.__objectives = [e[0] for e in objectives]
+        __ideal = [e[1] for e in objectives]
+        __nadir = [e[2] for e in objectives]
         self.__symbols = symbols
         super().__init__(
             nobj=__nobj,
             ideal=__ideal,
             nadir=__nadir,)
+        vars_to_add = []
+        for (ind, sym) in enumerate(symbols):
+            bounds = [
+                variables[ind][sym+"_lower_bound"],
+                variables[ind][sym+"_upper_bound"],
+                ]
+            name = sym
+            start = variables[ind][sym+"_initial_value"]
+
+            vars_to_add.append(Variable(bounds=bounds,
+                                        name=name,
+                                        starting_point=start))
+            print(vars_to_add)
+        self.add_variables(vars_to_add)
 
     def evaluate(self, population):
         res = []
         for values in population:
-            sdict = dict(zip((key for key in symbols), values))
+            sdict = dict(zip((key for key in self.__symbols), values))
             res.append(list(map(lambda obj: obj(sdict), self.__objectives)))
 
         return res
@@ -59,6 +77,7 @@ class NautilusView():
         else:
             _problem = problem
 
+        self.__problem = _problem
         self.__method = _method(_problem, _optimizer)
         self.__nadir = self.method.problem.nadir
         self.__ideal = self.method.problem.ideal
@@ -73,6 +92,14 @@ class NautilusView():
     @property
     def method(self):
         return self.__method
+
+    @property
+    def problem(self):
+        return self.__problem
+
+    @problem.setter
+    def problem(self, val):
+        self.__problem = val
 
     @property
     def nadir(self):
@@ -211,7 +238,7 @@ class ENautilusView(NautilusView):
         self.__n_generated_points = val
 
     def __validate_is_positive(self, val):
-        if val < 1:
+        if val < 0:
             raise ValueError("Value must be positive!")
 
     def initialize(self, **kwargs):
@@ -258,25 +285,21 @@ available_method_views_d = {
     }
 
 
-# TESTIN DELETE ME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
+# # TESTIN DELETE ME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # __example_valid = [
-#     {'expression': 'x + y + z', 'lower_bound': 0.0, 'upper_bound': 20.0},
-#     {'expression': 'x - z / y * 3', 'lower_bound': 33, 'upper_bound': 40.0},
-#     {'expression': '10 * x + 9', 'lower_bound': -1, 'upper_bound': 500},
+#     {'expression': 'x + y + z', 'lower_bound': -50.0, 'upper_bound': 50.0},
+#     {'expression': 'x - z', 'lower_bound': -33.0, 'upper_bound': 40.0},
+#     ]
+# __example_variables = [
+#     {'x_lower_bound': 0, 'x_upper_bound': 10, 'x_initial_value': 5},
+#     {'y_lower_bound': -5, 'y_upper_bound': 5, 'y_initial_value': 0.1},
+#     {'z_lower_bound': 15, 'z_upper_bound': 20, 'z_initial_value': 17.5},
 #     ]
 
-# expressions, symbols = parse(__example_valid)
+# expressions, symbols, _ = parse(__example_valid)
 
-# anal = AnalyticalProblem(expressions, symbols)
-
-# # Add vars
-# anal.add_variables([
-#     Variable(bounds=[0, 10], name='x', starting_point=2),
-#     Variable(bounds=[2, 5], name='y', starting_point=3),
-#     Variable(bounds=[6, 10], name='z', starting_point=7)
-# ])
+# anal = AnalyticalProblem(expressions, symbols, __example_variables)
+# print(anal.bounds())
 
 # view = ENautilusView(problem=anal)
 
