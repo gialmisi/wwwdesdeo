@@ -9,6 +9,7 @@ from .forms import (InitializationForm,
                     VariableFormsFactory,)
 from .expression_parser import parse, ExpressionException
 from .misc import analytical_problem_to_latex
+from .visualization import parallel_axes
 
 
 def index(request):
@@ -107,7 +108,8 @@ def method_initialization(request):
             data = form.cleaned_data
             sf.current_view.initialize(**data)
             # Start iterating
-            return redirect(reverse("method_iteration"))
+            # return redirect(reverse("method_iteration"))
+            return redirect(reverse("method_visual_iteration"))
         else:
             context["message"] = "Form is invalid"
             template = "nautilus/error.html"
@@ -183,6 +185,33 @@ def method_iteration(request):
         return render(request, template, context)
 
     return redirect(reverse("index"))
+
+
+def method_visual_iteration(request):
+    template_dir = "nautilus/" + sf.current_view.template_dir
+    template = template_dir + "/iterate.html"
+    # Every method has its' own preference requirements for iterating
+    preferences = sf.current_view.preference_requirements
+    context = {}
+
+    # Iterate for the first time
+    if sf.current_view.is_first_iteration:
+        # iterate with no preferences
+        sf.current_view.iterate()
+
+    last_results = sf.current_view.last_iteration
+    total_iterations = sf.current_view.user_iters
+    current_iteration = sf.current_view.user_iters -\
+        sf.current_view.current_iter
+    context["current_iteration"] = current_iteration
+    context["total_iterations"] = total_iterations
+
+    print(preferences)
+    res, _ = parallel_axes(last_results[preferences[0]],
+                           last_results["lower_bounds"])
+    context["visualization"] = res
+
+    return render(request, template, context)
 
 
 def method_results(request):

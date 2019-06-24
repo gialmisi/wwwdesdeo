@@ -24,6 +24,11 @@
     {% endfor %}
     {% endfor %}
   </table>
+  {% else %}
+  {{ visualization |safe}}
+  {% block scripts %}
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  {% endblock %}
   {% endif %}
 </div>
 
@@ -44,3 +49,4 @@
 {% endif %}
 </div>
 {% endblock %}
+

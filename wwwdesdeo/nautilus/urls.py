@@ -12,6 +12,8 @@ urlpatterns = [
          name="method_initialization"),
     path("iteration.html", views.method_iteration,
          name="method_iteration"),
+    path("visual_iteration.html", views.method_visual_iteration,
+         name="method_visual_iteration"),
     path("results.html", views.method_results,
          name="method_results"),
     path("analytical_problem_input_objectives.html",
