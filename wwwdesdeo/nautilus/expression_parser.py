@@ -88,14 +88,14 @@ def parse(expressions):
     if not expressions_are_valid(expressions):
         return False
 
-    objevtives = []  # contains (function, low_b, up_b)
+    objectives = []  # contains (function, low_b, up_b)
     unique_symbols = set()
     sympy_exprs = []  # the sympy expressions
 
     for expr in expressions:
         fun, symbols, sympy_expr = exprs_to_lambda(expr["expression"])
         unique_symbols |= symbols  # unision
-        objevtives.append((
+        objectives.append((
             fun,
             expr["lower_bound"],
             expr["upper_bound"],
@@ -104,7 +104,7 @@ def parse(expressions):
 
     unique_symbols_str = sorted(map(str, (unique_symbols)))
 
-    return objevtives, unique_symbols_str, sympy_exprs
+    return objectives, unique_symbols_str, sympy_exprs
 
 
 # __example = [

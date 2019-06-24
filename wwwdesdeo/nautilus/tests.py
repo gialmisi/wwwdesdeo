@@ -1,10 +1,15 @@
 from functools import reduce
 
 from django.test import TestCase, tag
-from .stateful_view import ENautilusView, NautilusView
+from .stateful_view import (ENautilusView,
+                            NautilusView,
+                            AnalyticalProblem,
+                            )
 from .expression_parser import (exprs_to_lambda,
                                 free_symbols_dict,
-                                ExpressionException,)
+                                parse,
+                                ExpressionException,
+                                )
 
 
 @tag("stateful_view")
@@ -149,11 +154,19 @@ def compare_dicts(this, that):
 
 @tag("parser")
 class expression_parser_test(TestCase):
+    __example = [
+        {'expression': 'x + y', 'lower_bound': 0.0, 'upper_bound': 5.0},
+        {'expression': 'y / z - 1', 'lower_bound': 33,
+         'upper_bound': 40.0},
+        {'expression': 'FROM TABLE DROP *', 'lower_bound': -1,
+         'upper_bound': -1},
+    ]
+
     def test_exprs_to_lambda(self):
         """Test that a simple string is properly parsed into a callable expression.
         """
         str_input = "x + y"
-        lam, _ = exprs_to_lambda(str_input)
+        lam, _, _ = exprs_to_lambda(str_input)
         sdict = {'y': 6, 'x': 5}
         self.assertAlmostEqual(lam(sdict), 11)
 
@@ -161,7 +174,7 @@ class expression_parser_test(TestCase):
         """Test that the right free symbols are extracted from a simple string input.
         """
         str_input = "x - y / z"
-        lam, _ = exprs_to_lambda(str_input)
+        lam, _, _ = exprs_to_lambda(str_input)
         sdict = free_symbols_dict(str_input)
         sdict["x"] = 5
         sdict["y"] = 7
@@ -171,7 +184,7 @@ class expression_parser_test(TestCase):
     def test_exprs_to_lambda_complex(self):
         """A more complex test"""
         str_input = "cos(x*pi) + x**2 - y / sqrt(z) + a*y"
-        lam, _ = (exprs_to_lambda(str_input))
+        lam, _, _ = (exprs_to_lambda(str_input))
         sdict = free_symbols_dict(str_input)
         sdict["x"] = -5.1
         sdict["y"] = 1.2
@@ -183,15 +196,66 @@ class expression_parser_test(TestCase):
         """ Test if the lamdifyed expression can handle unnecessary arguments.
         """
         str_input = "x + y"
-        lam, _ = exprs_to_lambda(str_input)
+        lam, _, _ = exprs_to_lambda(str_input)
         self.assertEqual(lam({"x": 4, "y": 5, "z": 10}), 9)
 
     def test_too_few_arguments(self):
         """ Test if the expression can handle too few arguments.
         """
         str_input = "x + y + z"
-        lam, _ = exprs_to_lambda(str_input)
+        lam, _, _ = exprs_to_lambda(str_input)
         sdict = {"x": 5, "y": -3}
 
         with self.assertRaises(ExpressionException):
             lam(sdict)
+
+    def test_parse_ok(self):
+        """ Test parsing a valid input
+        """
+        example = expression_parser_test.__example
+        objectives, unique_symbols, _ = parse(example[0:2])
+        self.assertEqual(len(objectives), 2)
+        self.assertEqual(len(unique_symbols), 3)
+
+    def test_parse_fail(self):
+        """ Test parsing an invalid input
+        """
+        example = expression_parser_test.__example
+
+        with self.assertRaises(ExpressionException):
+            _ = parse([example[2]])
+
+
+@tag("analytical")
+class analytical_problem_test(TestCase):
+    __example = [
+        {'expression': 'x + y', 'lower_bound': 0.0, 'upper_bound': 10.0},
+        {'expression': 'y / z - 1', 'lower_bound': 33,
+         'upper_bound': 40.0},
+        {'expression': 'x * x * x - y', 'lower_bound': -5,
+         'upper_bound': 5},
+    ]
+    __example_variables = [
+        {'x_lower_bound': 5, 'x_upper_bound': 10, 'x_initial_value': 9},
+        {'y_lower_bound': 8, 'y_upper_bound': 12, 'y_initial_value': 11},
+        {'z_lower_bound': 15, 'z_upper_bound': 20, 'z_initial_value': 17.5},
+    ]
+
+    def test_simple_problem(self):
+        """ Test a simple, single objective problem
+        """
+        example = [analytical_problem_test.__example[0]]
+        variables = analytical_problem_test.__example_variables
+        objectives, symbols, _ = parse(example)
+        problem = AnalyticalProblem(objectives, symbols, variables)
+        sf_view = ENautilusView(problem=problem)
+        sf_view.initialize(**{"User iterations": 10,
+                              "Number of generated points": 5})
+
+        while sf_view.current_iter > 1:
+            sf_view.iterate()
+
+        res = sf_view.iterate()
+        self.assertAlmostEqual(res["Most preferred point"][0][0], 13, places=6)
+
+        self.assertTrue(True)
