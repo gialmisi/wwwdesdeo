@@ -1,3 +1,7 @@
+"""Contains url patterns and the corresponding views to be called when the user
+queries an address.
+
+"""
 from django.urls import path
 
 from . import views

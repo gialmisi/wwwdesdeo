@@ -1,8 +1,6 @@
+"""Miscellaneous utility functions.
+"""
 from sympy import latex
-
-from expression_parser import (expressions_example,
-                               symbols_example,
-                               variables_example)
 
 
 def analytical_problem_to_latex(expressions, symbols, variables):
@@ -10,7 +8,8 @@ def analytical_problem_to_latex(expressions, symbols, variables):
 
     :param expressions: List of sympy functions representing objectives
     :param symbols: A list of symbols presents in the functions
-    :param variables: A list of dicts with bounds and initial values for each variable.
+    :param variables: A list of dicts with bounds and initial values for each
+    variable.
     :returns: A dict latex code
     :rtype: dict
 
@@ -39,6 +38,9 @@ def analytical_problem_to_latex(expressions, symbols, variables):
     return latex_objectives, latex_variables
 
 
+# from expression_parser import (expressions_example,
+#                                symbols_example,
+#                                variables_example)
 # analytical_problem_to_latex(expressions_example,
 #                             symbols_example,
 #                             variables_example)

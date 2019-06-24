@@ -1,4 +1,7 @@
-from desdeo.method import ENAUTILUS, NAUTILUSv1, NNAUTILUS
+"""A collection of dicts that represent the available features implemented
+at the moment.
+"""
+from desdeo.method import ENAUTILUS
 from desdeo.optimization import SciPyDE
 from desdeo.problem.toy import RiverPollution
 

@@ -1,24 +1,74 @@
+"""The purpose of these classes and file is to wrap the DESDEO methods in such
+a way that they can be easily and abstractly be used with the views. State is
+maintained in a silly manner at the moment using global variables. This
+probably does not work with multiple users.
+
+TODO: This should probably be done using models instead of the global variables
+after the imports.
+
+"""
 import models as m
 from desdeo.problem import MOProblem, Variable
 from expression_parser import parse
 
 
-current_view = None  # Active view
-current_expressions = None  # For analytical prolems (functions)
-current_sympy_exprs = None  # Sympy expressions
-current_symbols = None  # For analytical problems (set)
+# These variables are used to maintain state between views.
+# TODO: Use models?
+
+# The currently active view
+current_view = None
+
+# Expressions inputted by the user
+current_expressions = None
+# Example:
+# __example_valid = [
+#     {'expression': 'x + y + z', 'lower_bound': -50.0, 'upper_bound': 50.0},
+#     {'expression': 'x - z', 'lower_bound': -33.0, 'upper_bound': 40.0},
+#     ]
+
+# The expressions as sympy object
+current_sympy_exprs = None
+
+# The current variables present in the expressions as symbols
+current_symbols = None
+
+# Info on the variables
+# Example:
+# __example_variables = [
+#     {'x_lower_bound': 0, 'x_upper_bound': 10, 'x_initial_value': 5},
+#     {'y_lower_bound': -5, 'y_upper_bound': 5, 'y_initial_value': 0.1},
+#     {'z_lower_bound': 15, 'z_upper_bound': 20, 'z_initial_value': 17.5},
+#     ]
 current_variables = None  # For analytical problems (upper, lower, curr)
+
+# The selected optimizer (relevant when an analytical problem in inputted)
 optimizer = None
+
+# The selected method (relevant when an analytical problem is inputted)
 method = None
 
 
 class AnalyticalProblem(MOProblem):
+    """An implementation of the DESDEO class MOProblem to be used with analytical
+    problems.
+
+    """
     def __init__(self, objectives, symbols, variables):
+        """Constr
+
+        :param objectives: like [callable objective function, min value,
+        max value]
+        :param symbols: list containing the symbols present in the objectives
+        :param variables: [{'symbol'_min_value, 'symbol'_max_value,
+        'symbol'_initial_value}]
+
+        """
         __nobj = len(objectives)
         # TODO: Handle no bounds
         # TODO: objective funcions names
         # TODO: maximize or minimize?
         self.__objectives = [e[0] for e in objectives]
+        # The ideal and nadir are the objective bounds
         __ideal = [e[1] for e in objectives]
         __nadir = [e[2] for e in objectives]
         self.__symbols = symbols
@@ -26,6 +76,8 @@ class AnalyticalProblem(MOProblem):
             nobj=__nobj,
             ideal=__ideal,
             nadir=__nadir,)
+
+        # Form the variables and add them to the MOProblem
         vars_to_add = []
         for (ind, sym) in enumerate(symbols):
             bounds = [
@@ -38,10 +90,18 @@ class AnalyticalProblem(MOProblem):
             vars_to_add.append(Variable(bounds=bounds,
                                         name=name,
                                         starting_point=start))
-            print(vars_to_add)
         self.add_variables(vars_to_add)
 
     def evaluate(self, population):
+        """Evaluate the problem with given variable values.
+
+        :param population: A list containing input vectors to the
+        multiobjevtive problem.
+        :returns: A list with vectors corresponding to the evaluated value
+        with each input vector.
+        :rtype: List[List[Float]]
+
+        """
         res = []
         for values in population:
             sdict = dict(zip((key for key in self.__symbols), values))
@@ -280,6 +340,7 @@ class ENautilusView(NautilusView):
         return results_d
 
 
+# Collect and export the available methods.
 available_method_views_d = {
     "ENAUTILUS": ENautilusView,
     }

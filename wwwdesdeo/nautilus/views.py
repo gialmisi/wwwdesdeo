@@ -186,6 +186,13 @@ def method_iteration(request):
 
 
 def method_results(request):
+    """ Generates a page to shows the final results.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
     # Every method should have their own templates
     template_dir = "nautilus/" + sf.current_view.template_dir
     template = template_dir + "/iterate.html"
@@ -198,6 +205,14 @@ def method_results(request):
 
 
 def analytical_problem_input_objectives(request):
+    """Generates a page for the user to input objective functions and their limits.
+    TODO: Ask the user whether the objective is to be maximixed or minimized.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
     template = "nautilus/analytical_problem_input_objectives.html"
     context = {}
     context["title"] = "Objective specification"
@@ -231,6 +246,14 @@ def analytical_problem_input_objectives(request):
 
 
 def analytical_problem_input_variables(request):
+    """Based on the objectives (stored in stateful_view), generates a page where
+    the user can specify limits for the variables present in the objectives.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
     template = "nautilus/analytical_problem_input_variables.html"
     context = {}
     context["title"] = "Decision variable specification"
@@ -257,6 +280,14 @@ def analytical_problem_input_variables(request):
 
 
 def analytical_problem_confirm(request):
+    """Shows the problem's objectives and limits, variables and limits, and renders
+    them in LaTex.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
     template = "nautilus/analytical_problem_confirm.html"
     context = {}
     context["title"] = "Confirm analytical problem"
@@ -271,11 +302,22 @@ def analytical_problem_confirm(request):
 
 
 def analytical_problem_optimize(request):
+    """Performs all the necessary calls for the underlying stateful_view to be
+    properly set up with the problem specicied by the user. Redirects to
+    'method_initialization' when done.
+
+    :param request: Contains GET and POST requests encoded in a dict
+    :returns: A Http response with an html page
+    :rtype: HttpResponse
+
+    """
+    # Create the analytical problem
     problem = sf.AnalyticalProblem(
         sf.current_expressions,
         sf.current_symbols,
         sf.current_variables
         )
+    # Setup the stateful view
     sf_view = sf.available_method_views_d[sf.method](
         sf.method,
         sf.optimizer,

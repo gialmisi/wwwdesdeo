@@ -1,9 +1,18 @@
+"""Contains various forms used in the different views.
+"""
 from django import forms
 from django.forms import formset_factory
 
 
 class InitializationForm(forms.Form):
+    """A form that shows (and allows selection) all the available methods,
+    optimizers and problems.
+
+    """
     def __create_form(self, fields, label, field_labels=None):
+        """A helper function to aid in the initialization of the class.
+
+        """
         if not field_labels:
             field_labels = fields
         return forms.CharField(
@@ -37,6 +46,10 @@ class InitializationForm(forms.Form):
 
 
 class MethodInitializationForm(forms.Form):
+    """A form that lists the method specific optinons required for the
+    initialization of the method.
+
+    """
     def __init__(self,
                  requirements,
                  *args,
@@ -48,6 +61,9 @@ class MethodInitializationForm(forms.Form):
 
 
 class IterationForm(forms.Form):
+    """A form to show relevant information about the iteration phase of a method.
+
+    """
     def __init__(self,
                  choices,
                  *args,
@@ -63,7 +79,8 @@ class IterationForm(forms.Form):
 
 
 class AnalyticalProblemInputForm(forms.Form):
-    """Documentation for AnalyticalProblemInputForm
+    """A form which shows fields for the input of analytically specified
+    objective functions.
 
     """
     expression = forms.CharField(
@@ -98,6 +115,10 @@ class AnalyticalProblemInputForm(forms.Form):
 
 
 class AnalyticalProblemInputVariablesForm(forms.Form):
+    """A form that shows fields for specifying details about the variables
+    present in the objectives inputted by the user.
+
+    """
     def __init__(self,
                  symbol,
                  *args,
@@ -137,6 +158,15 @@ class AnalyticalProblemInputVariablesForm(forms.Form):
 
 
 def VariableFormsFactory(symbols, post=None):
+    """A factory function to create variable input form for a specific
+    variable.
+
+    :symbols: A list of symbols representing variables
+    :post: Is the form to be created with filled data from a POST req?
+    :returns: A list of forms
+    :rtype: List[AnalyticalProblemInputVariablesForm]
+
+    """
     forms = []
     for symbol in symbols:
         if post is not None:
