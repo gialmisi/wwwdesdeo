@@ -8,11 +8,6 @@
   <!-- Load a basic css file and provide and extensible block. -->
   <link rel="stylesheet" type="text/css" href="{% static 'nautilus/style/style.css' %}">
   {% block style %}{% endblock %}
-  <!-- Load scripts. jquery and scripts.js is loaded by default. Jquery is
-  provided as a static file and must be manually updated. -->
-  <script type="text/javascript" src="{% static 'nautilus/scripts/jquery-3.4.1.min.js' %}"></script>
-  <script type="text/javascript" src="{% static 'nautilus/scripts/scripts.js' %}"></script>
-  {% block scripts %}{% endblock %}
 </head>
 <html lang="en">
   <header>

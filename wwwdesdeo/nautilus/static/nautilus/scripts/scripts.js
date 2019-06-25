@@ -11,7 +11,5 @@ $(document).ready(() => {
 	$('#formset').append($('#empty-form').html().replace(/__prefix__/g, formIndex));
 	$('#id_form-TOTAL_FORMS').val(parseInt(formIndex) + 1);
     });
+
 });
-
-
-

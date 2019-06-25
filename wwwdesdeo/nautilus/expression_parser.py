@@ -8,7 +8,7 @@ from sympy.utilities.lambdify import lambdify
 
 
 # Match for basic artihmetic operators
-__match_arithmetics = r'^(([0-9]|[a-z])+ ([\+,\-,\*,\/] ([0-9]|[a-z])*)+)*$'
+__match_arithmetics = r'^(([0-9]|[a-z])+ ([\+,\-,\*,/] ([0-9]|[a-z])*)+)*$'
 
 
 class ExpressionException(Exception):

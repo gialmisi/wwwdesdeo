@@ -1,9 +1,15 @@
 <!-- Show the intermediate and final results. Allow the DM to make appropiate
      choices between each iteration. -->
 {% extends "../base.html" %}
+{% load static %}
 
 <!-- Display the header with the current iteration and total iterations -->
 {% block header %}
+{% if visualization %}
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script src="{% static 'nautilus/scripts/visual.js' %}"></script>
+{% endif %}
 {{ title|default:"title" }}({{ current_iteration|default:"cur iter" }}/{{ total_iterations|default:"tot iter" }})
 {% endblock %}
 
@@ -26,9 +32,13 @@
   </table>
   {% else %}
   {{ visualization |safe}}
-  {% block scripts %}
-  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  {% endblock %}
+  <script>
+    var visualizationDivId= '{{ div_id }}';
+  </script>
+  <form id="iteration-response-form" action="" method="post">
+    <!-- JS is used to fill out this form -->
+    {% csrf_token %}
+  </form>
   {% endif %}
 </div>
 
@@ -49,4 +59,6 @@
 {% endif %}
 </div>
 {% endblock %}
+
+
 

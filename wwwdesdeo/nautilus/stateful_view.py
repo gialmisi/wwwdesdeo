@@ -146,6 +146,7 @@ class NautilusView():
         self.__is_first_iteration = True
         self.__initialization_requirements = None
         self.__preference_requirements = None
+        self.__preference_extras = None
         self.__last_iteration = None
         self.__help = None
 
@@ -218,6 +219,14 @@ class NautilusView():
         self.__preference_requirements = val
 
     @property
+    def preference_extras(self):
+        return self.__preference_extras
+
+    @preference_extras.setter
+    def preference_extras(self, val):
+        self.__preference_extras = val
+
+    @property
     def last_iteration(self):
         return self.__last_iteration
 
@@ -255,7 +264,10 @@ class ENautilusView(NautilusView):
             "Number of generated points",
             ]
         self.preference_requirements = [
-            "Most preferred point",
+            "preferred_point",
+            ]
+        self.preference_extras = [
+            "lower_bounds",
             ]
         self.last_iteration = None
         self.__total_points_returned = 0
@@ -328,7 +340,7 @@ class ENautilusView(NautilusView):
         # to the DM as choices. Alwats return the latest points.
         start = self.__total_points_returned
         results_d = {
-            "Most preferred point": [entry[1] for entry in results[start:]],
+            "preferred_point": [entry[1] for entry in results[start:]],
             "lower_bounds": [entry[0] for entry in results[start:]],
             }
         self.last_iteration = results_d

@@ -9,7 +9,7 @@ from .forms import (InitializationForm,
                     VariableFormsFactory,)
 from .expression_parser import parse, ExpressionException
 from .misc import analytical_problem_to_latex
-from .visualization import parallel_axes
+from .visualization import bars_graph
 
 
 def index(request):
@@ -199,17 +199,39 @@ def method_visual_iteration(request):
         # iterate with no preferences
         sf.current_view.iterate()
 
-    last_results = sf.current_view.last_iteration
     total_iterations = sf.current_view.user_iters
     current_iteration = sf.current_view.user_iters -\
         sf.current_view.current_iter
+    last_results = sf.current_view.last_iteration
     context["current_iteration"] = current_iteration
     context["total_iterations"] = total_iterations
 
-    print(preferences)
-    res, _ = parallel_axes(last_results[preferences[0]],
-                           last_results["lower_bounds"])
-    context["visualization"] = res
+    if request.method == "POST":
+        # handle form and iterate
+        try:
+            # convert the string to an int
+            # selection=list(map(float, request.POST["selection"].split(",")))
+            selection = int(request.POST["selection"])
+
+        except Exception as e:
+            context["message"] = str(e)
+            template = "nautilus/error.html"
+            return render(request, template, context)
+
+        preference = list(zip(*last_results.values()))[selection-1]
+        # Check end condition
+        if current_iteration + 1 == total_iterations:
+            sf.current_view.iterate(preference)
+            return redirect(reverse("method_results"))
+
+        sf.current_view.iterate(preference)
+        return redirect(reverse("method_visual_iteration"))
+
+    else:
+        # Don't iterate, but show last iteration's results
+        html_div, div_id = bars_graph(last_results[preferences[0]])
+        context["visualization"] = html_div
+        context["div_id"] = div_id
 
     return render(request, template, context)
 
